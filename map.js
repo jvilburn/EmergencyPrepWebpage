@@ -9,29 +9,165 @@ let markers = {};
 let streetLayer = null;
 let satelliteLayer = null;
 let showingClusters = true;
+let isOnline = navigator.onLine;
+let connectivityChecked = false;
+let missingTiles = {
+  osm: new Set(),
+  satellite: new Set()
+};
 
-// Custom tile layer with fallback to lower zoom levels
-L.TileLayer.Fallback = L.TileLayer.extend({
-  _tileOnError: function(done, tile, e) {
-    // Immediately use transparent placeholder to avoid multiple failed requests
-    tile.src = this.options.errorTileUrl;
-    
-    // Prevent the error from bubbling up to avoid console messages
-    if (e && e.preventDefault) {
-      e.preventDefault();
-      e.stopPropagation();
+// Check internet connectivity
+function checkConnectivity() {
+  return new Promise((resolve) => {
+    if (!navigator.onLine) {
+      resolve(false);
+      return;
     }
+    
+    // Try to fetch a small image from a reliable CDN
+    const img = new Image();
+    const timeout = setTimeout(() => {
+      resolve(false);
+    }, 3000);
+    
+    img.onload = () => {
+      clearTimeout(timeout);
+      resolve(true);
+    };
+    
+    img.onerror = () => {
+      clearTimeout(timeout);
+      resolve(false);
+    };
+    
+    // Use a small 1x1 pixel image from a reliable CDN
+    img.src = 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png?' + Date.now();
+  });
+}
+
+// Hybrid tile layer that tries offline first, then online
+L.TileLayer.Hybrid = L.TileLayer.extend({
+  initialize: function(offlineUrlTemplate, onlineUrlTemplate, options) {
+    this.offlineUrlTemplate = offlineUrlTemplate;
+    this.onlineUrlTemplate = onlineUrlTemplate;
+    this.onlineMode = false;
+    this.layerType = options.layerType || 'osm';
+    L.TileLayer.prototype.initialize.call(this, offlineUrlTemplate, options);
   },
   
-  _loadTile: function(tile, coords) {
-    tile.setAttribute('data-key', coords.x + ':' + coords.y);
-    L.TileLayer.prototype._loadTile.call(this, tile, coords);
+  createTile: function(coords, done) {
+    const tile = document.createElement('img');
+    
+    L.DomEvent.on(tile, 'load', L.Util.bind(this._tileOnLoad, this, done, tile));
+    L.DomEvent.on(tile, 'error', L.Util.bind(this._tileOnError, this, done, tile));
+    
+    if (this.options.crossOrigin || this.options.crossOrigin === '') {
+      tile.crossOrigin = this.options.crossOrigin === true ? '' : this.options.crossOrigin;
+    }
+    
+    tile.alt = '';
+    tile.setAttribute('role', 'presentation');
+    tile.setAttribute('data-coords', JSON.stringify(coords));
+    
+    // Try offline first
+    tile.src = this.getTileUrl(coords);
+    
+    return tile;
+  },
+  
+  _tileOnError: function(done, tile, e) {
+    const coordsStr = tile.getAttribute('data-coords');
+    let coords = {};
+    
+    if (coordsStr) {
+      try {
+        coords = JSON.parse(coordsStr);
+      } catch (e) {
+        console.warn('Failed to parse tile coords:', coordsStr);
+      }
+    }
+    
+    // Track missing offline tile
+    if (!tile.hasTriedOnline && coords.z !== undefined && coords.x !== undefined && coords.y !== undefined) {
+      const tileKey = `${coords.z}/${coords.x}/${coords.y}`;
+      missingTiles[this.layerType].add(tileKey);
+      console.log(`Missing tile detected: ${this.layerType} ${tileKey}`);
+      updateMissingTilesCount();
+    }
+    
+    // If offline tile failed and we haven't tried online yet
+    if (!tile.hasTriedOnline && isOnline) {
+      tile.hasTriedOnline = true;
+      
+      // Try online source
+      const tempLayer = L.tileLayer(this.onlineUrlTemplate, this.options);
+      tile.src = tempLayer.getTileUrl(coords);
+      
+      // Set up success handler to track online mode
+      const originalOnLoad = tile.onload;
+      tile.onload = () => {
+        if (!this.onlineMode) {
+          this.onlineMode = true;
+          this._updateAttribution();
+        }
+        if (originalOnLoad) originalOnLoad.call(tile);
+        done(null, tile);
+      };
+      
+      // Set up new error handler for online attempt
+      const originalOnError = tile.onerror;
+      tile.onerror = (e) => {
+        // Both offline and online failed, use error tile
+        tile.src = this.options.errorTileUrl;
+        if (originalOnError) originalOnError.call(tile, e);
+        done(null, tile);
+      };
+      
+      return; // Don't call done yet, wait for online attempt
+    }
+    
+    // Both attempts failed or no internet, use error tile
+    tile.src = this.options.errorTileUrl;
+    done(null, tile);
+  },
+  
+  _updateAttribution: function() {
+    if (this._map && this._map.attributionControl) {
+      const attribution = this.onlineMode ? 
+        this.options.onlineAttribution : 
+        this.options.offlineAttribution;
+      
+      // Update attribution
+      this._map.attributionControl.removeAttribution(this.options.offlineAttribution);
+      this._map.attributionControl.removeAttribution(this.options.onlineAttribution);
+      this._map.attributionControl.addAttribution(attribution);
+    }
   }
 });
 
-// Initialize map with offline tiles
-function initMap() {
+// Initialize map with hybrid tiles
+async function initMap() {
   if (map) return;
+  
+  // Check connectivity first
+  if (!connectivityChecked) {
+    isOnline = await checkConnectivity();
+    connectivityChecked = true;
+    updateConnectivityIndicator();
+    
+    // Set up connectivity monitoring
+    window.addEventListener('online', async () => {
+      isOnline = await checkConnectivity();
+      updateConnectivityIndicator();
+      console.log('Connection restored, online mode available');
+    });
+    
+    window.addEventListener('offline', () => {
+      isOnline = false;
+      updateConnectivityIndicator();
+      console.log('Connection lost, using offline mode only');
+    });
+  }
   
   map = L.map('map', {
     zoomControl: false
@@ -42,21 +178,36 @@ function initMap() {
     position: 'topright'
   }).addTo(map);
   
-  // Street map layer (OpenStreetMap tiles) with fallback
-  streetLayer = new L.TileLayer.Fallback('tiles/osm/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors | Offline Mode',
-    maxZoom: 16,
-    minZoom: 7,
-    errorTileUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI2Y4ZjlmYSIvPjwvc3ZnPg=='
-  });
+  // Street map layer (Hybrid: offline first, then online OpenStreetMap)
+  streetLayer = new L.TileLayer.Hybrid(
+    'tiles/osm/{z}/{x}/{y}.png',
+    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    {
+      attribution: '© OpenStreetMap contributors',
+      offlineAttribution: '© OpenStreetMap contributors | Offline Mode',
+      onlineAttribution: '© OpenStreetMap contributors | Online Mode',
+      maxZoom: 16,
+      minZoom: 7,
+      subdomains: ['a', 'b', 'c'],
+      layerType: 'osm',
+      errorTileUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjEyOCIgeT0iMTI4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LXNpemU9IjE0Ij5ObyBUaWxlPC90ZXh0Pjwvc3ZnPg=='
+    }
+  );
   
-  // Satellite layer (ArcGIS tiles) with fallback
-  satelliteLayer = new L.TileLayer.Fallback('tiles/satellite/{z}/{y}/{x}.png', {
-    attribution: '© Esri | Offline Mode',
-    maxZoom: 16,
-    minZoom: 7,
-    errorTileUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iIzk1YTVhNiIvPjwvc3ZnPg=='
-  });
+  // Satellite layer (Hybrid: offline first, then online Esri)
+  satelliteLayer = new L.TileLayer.Hybrid(
+    'tiles/satellite/{z}/{y}/{x}.png', 
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {
+      attribution: '© Esri',
+      offlineAttribution: '© Esri | Offline Mode',
+      onlineAttribution: '© Esri | Online Mode',
+      maxZoom: 16,
+      minZoom: 7,
+      layerType: 'satellite',
+      errorTileUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iIzk1YTVhNiIvPjx0ZXh0IHg9IjEyOCIgeT0iMTI4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjY2IiBmb250LXNpemU9IjE0Ij5ObyBUaWxlPC90ZXh0Pjwvc3ZnPg=='
+    }
+  );
   
   // Suppress console errors for missing tiles more comprehensively
   const originalConsoleError = console.error;
@@ -609,6 +760,126 @@ function toggleClusters() {
   }
 }
 
+// Update connectivity indicator in status bar
+function updateConnectivityIndicator() {
+  const indicator = document.getElementById('connectivityIndicator');
+  if (!indicator) return;
+  
+  if (isOnline) {
+    indicator.textContent = '🌐 Online';
+    indicator.className = 'connectivity-indicator online';
+    indicator.title = 'Internet connection available - maps will load from online sources when offline tiles are not available';
+  } else {
+    indicator.textContent = '📱 Offline';
+    indicator.className = 'connectivity-indicator offline';
+    indicator.title = 'No internet connection - using offline tiles only';
+  }
+}
+
+// Generate missing tiles report
+function generateMissingTilesReport() {
+  const osmTiles = Array.from(missingTiles.osm);
+  const satelliteTiles = Array.from(missingTiles.satellite);
+  
+  const report = {
+    generated: new Date().toISOString(),
+    total_missing: osmTiles.length + satelliteTiles.length,
+    osm: {
+      count: osmTiles.length,
+      tiles: osmTiles.sort()
+    },
+    satellite: {
+      count: satelliteTiles.length,
+      tiles: satelliteTiles.sort()
+    },
+    bounds: getCurrentMapBounds(),
+    zoom_levels: getCurrentZoomLevels()
+  };
+  
+  return report;
+}
+
+// Get current map bounds for the report
+function getCurrentMapBounds() {
+  if (!map) return null;
+  
+  const bounds = map.getBounds();
+  return {
+    north: bounds.getNorth(),
+    south: bounds.getSouth(),
+    east: bounds.getEast(),
+    west: bounds.getWest(),
+    center: {
+      lat: map.getCenter().lat,
+      lng: map.getCenter().lng
+    },
+    zoom: map.getZoom()
+  };
+}
+
+// Get zoom levels that have missing tiles
+function getCurrentZoomLevels() {
+  const zoomLevels = new Set();
+  
+  missingTiles.osm.forEach(tile => {
+    const zoom = parseInt(tile.split('/')[0]);
+    zoomLevels.add(zoom);
+  });
+  
+  missingTiles.satellite.forEach(tile => {
+    const zoom = parseInt(tile.split('/')[0]);
+    zoomLevels.add(zoom);
+  });
+  
+  return Array.from(zoomLevels).sort((a, b) => a - b);
+}
+
+// Export missing tiles report as JSON
+function exportMissingTilesReport() {
+  const report = generateMissingTilesReport();
+  
+  if (report.total_missing === 0) {
+    alert('No missing tiles detected. Navigate around the map to identify missing tiles.');
+    return;
+  }
+  
+  const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `missing-tiles-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  console.log('Missing tiles report exported:', report);
+}
+
+// Clear missing tiles tracking (useful for testing)
+function clearMissingTilesTracking() {
+  missingTiles.osm.clear();
+  missingTiles.satellite.clear();
+  console.log('Missing tiles tracking cleared');
+  updateMissingTilesCount();
+}
+
+// Show current missing tiles count
+function showMissingTilesCount() {
+  const total = missingTiles.osm.size + missingTiles.satellite.size;
+  alert(`Missing tiles tracked:\nOSM: ${missingTiles.osm.size}\nSatellite: ${missingTiles.satellite.size}\nTotal: ${total}\n\nCheck browser console for details.`);
+}
+
+// Update missing tiles count in UI
+function updateMissingTilesCount() {
+  const total = missingTiles.osm.size + missingTiles.satellite.size;
+  const indicator = document.getElementById('connectivityIndicator');
+  if (indicator && total > 0) {
+    const baseText = isOnline ? '🌐 Online' : '📱 Offline';
+    indicator.textContent = `${baseText} (${total} missing)`;
+  }
+}
+
 // Expose functions globally
 window.initMap = initMap;
 window.createMapMarkers = createMapMarkers;
@@ -617,3 +888,7 @@ window.updateMarkerAfterChange = updateMarkerAfterChange;
 window.updateBoundaries = updateBoundaries;
 window.resetView = resetView;
 window.toggleClusters = toggleClusters;
+window.updateConnectivityIndicator = updateConnectivityIndicator;
+window.exportMissingTilesReport = exportMissingTilesReport;
+window.clearMissingTilesTracking = clearMissingTilesTracking;
+window.showMissingTilesCount = showMissingTilesCount;

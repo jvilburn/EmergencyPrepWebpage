@@ -21,6 +21,8 @@
         <h4>📁 File Operations</h4>
         <button onclick="triggerFileLoad(); toggleHamburgerMenu()">📂 Load CSV</button>
         <button onclick="exportData(); toggleHamburgerMenu()">💾 Save CSV</button>
+        <button onclick="exportMissingTilesReport(); toggleHamburgerMenu()">🗺️ Export Missing Tiles</button>
+        <button onclick="showMissingTilesCount(); toggleHamburgerMenu()">🔍 Check Missing Count</button>
       </div>
       <div class="menu-section">
         <h4>📊 View</h4>
@@ -35,6 +37,7 @@
         <button onclick="viewChanges(); toggleHamburgerMenu()">📝 View Changes</button>
         <button onclick="undoLastChange(); toggleHamburgerMenu()">↶ Undo Last</button>
         <button onclick="clearHighlights(); toggleHamburgerMenu()">🔦 Clear Highlights</button>
+        <button onclick="clearMissingTilesTracking(); toggleHamburgerMenu()">🗑️ Clear Missing Tiles</button>
       </div>
     </div>
     <div class="sidebar-controls">
@@ -83,6 +86,7 @@
   <!-- Bottom Status Bar -->
   <div class="status-bar" id="statusBar">
     <span id="statusMessage">Ready - Load CSV to begin</span>
+    <span id="connectivityIndicator" class="connectivity-indicator">🔍 Checking connectivity...</span>
     <span id="changesIndicator" class="hidden">📝 0 changes</span>
   </div>
   

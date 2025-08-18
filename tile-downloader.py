@@ -7,6 +7,8 @@ Downloads map tiles for offline use - both street and satellite views
 import os
 import time
 import requests
+import json
+import argparse
 from math import floor, ceil, log, tan, pi, cos
 import csv
 
@@ -83,18 +85,22 @@ def get_tiles_for_households(household_locations, bounds):
                 # Add the tile containing this household
                 required_tiles.add((zoom, x, y))
                 
-                # Add surrounding tiles based on zoom
-                if zoom == 13:
-                    for dx in [-1, 0, 1]:
-                        for dy in [-1, 0, 1]:
+                # Add surrounding tiles based on zoom level for better coverage
+                if zoom <= 12:
+                    # Wide coverage for navigation
+                    for dx in range(-2, 3):
+                        for dy in range(-2, 3):
                             required_tiles.add((zoom, x + dx, y + dy))
-                elif zoom == 14:
-                    # Less padding at medium zoom
-                    for dx in [-1, 0, 1]:
-                        for dy in [-1, 0, 1]:
-                            if abs(dx) + abs(dy) <= 1:  # Only adjacent, not diagonal
-                                required_tiles.add((zoom, x + dx, y + dy))
-                # At max zoom (15-16), only download exact tiles
+                elif zoom <= 14:
+                    # Medium coverage for neighborhood details
+                    for dx in range(-2, 3):
+                        for dy in range(-2, 3):
+                            required_tiles.add((zoom, x + dx, y + dy))
+                elif zoom <= 16:
+                    # Close coverage for street-level details
+                    for dx in range(-1, 2):
+                        for dy in range(-1, 2):
+                            required_tiles.add((zoom, x + dx, y + dy))
     
     return required_tiles
 
@@ -117,32 +123,70 @@ def download_tile(url, filepath, retries=3):
         time.sleep(0.5 * (attempt + 1))  # Progressive delay
     return False
 
-def get_tiles_for_households(household_locations, bounds):
-    """Calculate which tiles actually contain households"""
-    required_tiles = set()
+def load_missing_tiles_report(report_file):
+    """Load missing tiles from JSON report"""
+    try:
+        with open(report_file, 'r') as f:
+            report = json.load(f)
+        
+        missing_tiles = set()
+        
+        # Add OSM tiles
+        for tile in report.get('osm', {}).get('tiles', []):
+            z, x, y = map(int, tile.split('/'))
+            missing_tiles.add(('osm', z, x, y))
+        
+        # Add satellite tiles
+        for tile in report.get('satellite', {}).get('tiles', []):
+            z, x, y = map(int, tile.split('/'))
+            missing_tiles.add(('satellite', z, x, y))
+        
+        return missing_tiles, report
     
-    for zoom in range(MIN_ZOOM, MAX_ZOOM + 1):
-        for lat, lon in household_locations:
-            x = lon_to_tile(lon, zoom)
-            y = lat_to_tile(lat, zoom)
-            
-            # Add the tile containing this household
-            required_tiles.add((zoom, x, y))
-            
-            # For lower zoom levels, add surrounding tiles for context
-            if zoom <= 13:
-                for dx in [-1, 0, 1]:
-                    for dy in [-1, 0, 1]:
-                        required_tiles.add((zoom, x + dx, y + dy))
-            elif zoom == 14:
-                # Less padding at medium zoom
-                for dx in [-1, 0, 1]:
-                    for dy in [-1, 0, 1]:
-                        if abs(dx) + abs(dy) <= 1:  # Only adjacent, not diagonal
-                            required_tiles.add((zoom, x + dx, y + dy))
-            # At max zoom (15-16), only download exact tiles
+    except Exception as e:
+        print(f"Error loading missing tiles report: {e}")
+        return None, None
+
+def download_missing_tiles(missing_tiles, output_dir='tiles'):
+    """Download specific missing tiles from a report"""
+    total_tiles = len(missing_tiles)
+    downloaded = 0
+    failed = 0
+    skipped = 0
     
-    return required_tiles
+    print(f"📍 Downloading {total_tiles} missing tiles...")
+    
+    for i, (map_type, zoom, x, y) in enumerate(missing_tiles, 1):
+        # Build file path
+        if map_type == 'satellite':
+            filepath = f"{output_dir}/{map_type}/{zoom}/{y}/{x}.png"
+            url = SERVERS[map_type].format(z=zoom, y=y, x=x)
+        else:
+            filepath = f"{output_dir}/{map_type}/{zoom}/{x}/{y}.png"
+            url = SERVERS[map_type].format(z=zoom, x=x, y=y)
+        
+        # Skip if already exists
+        if os.path.exists(filepath):
+            print(f"    ✓ Exists ({i}/{total_tiles}): {map_type} z{zoom}/{x}/{y}", end='\r')
+            skipped += 1
+            continue
+        
+        # Download
+        print(f"    ⬇ Downloading ({i}/{total_tiles}): {map_type} z{zoom}/{x}/{y}", end='\r')
+        if download_tile(url, filepath):
+            downloaded += 1
+        else:
+            failed += 1
+        
+        # Rate limiting
+        time.sleep(0.2)
+    
+    print(f"\n\n✅ Missing tiles download complete!")
+    print(f"   Downloaded: {downloaded} tiles")
+    print(f"   Already existed: {skipped} tiles")
+    print(f"   Failed: {failed} tiles")
+    
+    return downloaded, skipped, failed
 
 def download_tiles(bounds, output_dir='tiles', household_locations=None):
     """Download tiles - only where households exist if locations provided"""
@@ -225,20 +269,61 @@ def download_tiles(bounds, output_dir='tiles', household_locations=None):
     print(f"   Total size: {total_size / (1024*1024):.1f} MB")
 
 def main():
+    parser = argparse.ArgumentParser(description='Ward Map Tile Downloader')
+    parser.add_argument('--missing-tiles', '-m', help='JSON file with missing tiles report from the web app')
+    parser.add_argument('--csv', '-c', default='ward_data.csv', help='CSV file with household data (default: ward_data.csv)')
+    parser.add_argument('--output', '-o', default='tiles', help='Output directory for tiles (default: tiles)')
+    args = parser.parse_args()
+    
     print("🗺️  Ward Map Tile Downloader")
     print("="*40)
     
-    # Check for CSV file
-    csv_file = 'ward_data.csv'
+    # Check if we have a missing tiles report
+    if args.missing_tiles and os.path.exists(args.missing_tiles):
+        print(f"📄 Loading missing tiles report: {args.missing_tiles}")
+        missing_tiles, report = load_missing_tiles_report(args.missing_tiles)
+        
+        if missing_tiles is None:
+            print("❌ Failed to load missing tiles report")
+            return
+        
+        print(f"📊 Missing tiles report:")
+        print(f"   Generated: {report.get('generated', 'Unknown')}")
+        print(f"   Total missing: {report.get('total_missing', 0)} tiles")
+        print(f"   OSM tiles: {report.get('osm', {}).get('count', 0)}")
+        print(f"   Satellite tiles: {report.get('satellite', {}).get('count', 0)}")
+        
+        if report.get('bounds'):
+            bounds = report['bounds']
+            print(f"   Map area: {bounds.get('center', {}).get('lat', 0):.4f}, {bounds.get('center', {}).get('lng', 0):.4f}")
+            print(f"   Zoom levels: {report.get('zoom_levels', [])}")
+        
+        if len(missing_tiles) == 0:
+            print("✅ No missing tiles to download!")
+            return
+        
+        print(f"\n   This will take approximately {len(missing_tiles) * 0.2 / 60:.1f} minutes")
+        
+        response = input("\nProceed with download? (y/n): ")
+        if response.lower() != 'y':
+            print("Cancelled.")
+            return
+        
+        download_missing_tiles(missing_tiles, args.output)
+        print("\n✅ Done! Missing tiles have been downloaded.")
+        print("📁 Refresh your web app to see the new offline tiles")
+        return
+    
+    # Original CSV-based download mode
     household_locations = []
     
-    if os.path.exists(csv_file):
-        print(f"📄 Found {csv_file}, extracting bounds...")
-        bounds = get_bounds_from_csv(csv_file)
+    if os.path.exists(args.csv):
+        print(f"📄 Found {args.csv}, extracting bounds...")
+        bounds = get_bounds_from_csv(args.csv)
         
         # Also collect household locations for smart downloading
         try:
-            with open(csv_file, 'r', encoding='utf-8') as f:
+            with open(args.csv, 'r', encoding='utf-8') as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     if row['Latitude'] and row['Longitude']:
@@ -250,7 +335,7 @@ def main():
         except Exception as e:
             print(f"Warning: Could not read household locations: {e}")
     else:
-        print(f"⚠️  No {csv_file} found, using default Mocksville bounds")
+        print(f"⚠️  No {args.csv} found, using default Mocksville bounds")
         bounds = MOCKSVILLE_BOUNDS
     
     print(f"📍 Area bounds:")
@@ -286,7 +371,7 @@ def main():
         print("Cancelled.")
         return
     
-    download_tiles(bounds, household_locations=household_locations)
+    download_tiles(bounds, args.output, household_locations=household_locations)
     print("\n✅ Done! Your offline map tiles are ready.")
     print("📁 Place the 'tiles' folder in the same directory as index.html")
 

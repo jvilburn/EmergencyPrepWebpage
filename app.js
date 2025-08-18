@@ -4,9 +4,9 @@
 let editMode = false;
 
 // Initialize application
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', async function() {
   setupFileHandlers();
-  initMap();
+  await initMap();
   checkOfflineStatus();
   loadSavedData();
   setStatus('Ready - Load your ward CSV file', 'info');

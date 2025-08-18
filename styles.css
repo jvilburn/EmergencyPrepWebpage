@@ -1097,6 +1097,28 @@ input[type="file"] {
   display: none;
 }
 
+.connectivity-indicator {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.connectivity-indicator.online {
+  background: #28a745;
+  color: white;
+}
+
+.connectivity-indicator.offline {
+  background: #6c757d;
+  color: white;
+}
+
+.connectivity-indicator.checking {
+  background: #ffc107;
+  color: #212529;
+}
+
 /* Map adjustments moved to top of file to avoid duplication */
 
 /* Sidebar adjustments */
