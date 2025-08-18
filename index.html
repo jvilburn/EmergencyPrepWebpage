@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ward Directory Map - Offline Edition</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="sidebar-header">
+      <button class="hamburger-menu" onclick="toggleHamburgerMenu()" title="Menu">☰</button>
+      <h3>📋 Households</h3>
+      <button class="sidebar-toggle" onclick="toggleSidebar()" title="Collapse sidebar">◀</button>
+    </div>
+    
+    <!-- Hamburger Menu -->
+    <div class="hamburger-dropdown" id="hamburgerMenu" onclick="event.stopPropagation()">
+      <div class="menu-section">
+        <h4>📁 File Operations</h4>
+        <button onclick="triggerFileLoad(); toggleHamburgerMenu()">📂 Load CSV</button>
+        <button onclick="exportData(); toggleHamburgerMenu()">💾 Save CSV</button>
+      </div>
+      <div class="menu-section">
+        <h4>📊 View</h4>
+        <button onclick="showStatistics(); toggleHamburgerMenu()">📈 Statistics</button>
+        <button onclick="showLegend(); toggleHamburgerMenu()">🎨 Legend</button>
+        <button onclick="resetView(); toggleHamburgerMenu()">🏠 Reset View</button>
+        <button onclick="toggleClusters(); toggleHamburgerMenu()" id="clusterMenuBtn">👁️ Toggle Clusters</button>
+      </div>
+      <div class="menu-section">
+        <h4>✏️ Edit</h4>
+        <button onclick="showRegionClusterPanel(); toggleHamburgerMenu()">🗺️ Manage Regions</button>
+        <button onclick="viewChanges(); toggleHamburgerMenu()">📝 View Changes</button>
+        <button onclick="undoLastChange(); toggleHamburgerMenu()">↶ Undo Last</button>
+        <button onclick="clearHighlights(); toggleHamburgerMenu()">🔦 Clear Highlights</button>
+      </div>
+    </div>
+    <div class="sidebar-controls">
+      <input type="text" class="search-box" id="searchBox" placeholder="Search households..." onkeyup="filterHouseholds()">
+      
+      <!-- Collapsible Household List -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" onclick="toggleHouseholdList()">
+          <span>👥 Household List</span>
+          <span class="expand-icon" id="householdListIcon">▶</span>
+        </div>
+        <div class="collapsible-content collapsed" id="householdListSection">
+          <div class="sort-buttons">
+            <button class="sort-btn active" onclick="setSortMode('name')">By Name</button>
+            <button class="sort-btn" onclick="setSortMode('region')">By Communication Region</button>
+          </div>
+          <ul class="household-list" id="householdList"></ul>
+        </div>
+      </div>
+      
+      <!-- Collapsible Resource Filters -->
+      <div class="collapsible-section">
+        <div class="collapsible-header" onclick="toggleResourceFilters()">
+          <span>🔧 Resource Filters</span>
+          <span class="expand-icon" id="resourceFiltersIcon">▶</span>
+        </div>
+        <div class="collapsible-content collapsed" id="resourceFiltersSection">
+          <div class="resource-filters-grid" id="dynamicFiltersGrid">
+            <div class="loading-filters">Load household data to see available filters</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-footer" id="sidebarFooter">
+      0 households loaded
+    </div>
+  </div>
+  
+  <!-- Map Container -->
+  <div id="map"></div>
+  
+  
+  <!-- Hidden File Input -->
+  <input type="file" id="fileInput" accept=".csv" style="display: none;">
+  
+  <!-- Bottom Status Bar -->
+  <div class="status-bar" id="statusBar">
+    <span id="statusMessage">Ready - Load CSV to begin</span>
+    <span id="changesIndicator" class="hidden">📝 0 changes</span>
+  </div>
+  
+  <!-- Reassignment Dialog -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeReassignDialog()"></div>
+  <div class="reassign-dialog" id="reassignDialog">
+    <div class="dialog-header">
+      <h3>Edit Household</h3>
+      <div id="selectedHousehold" class="household-info"></div>
+      <div id="currentAssignment" class="current-assignment"></div>
+    </div>
+    
+    <div class="reassign-options" id="reassignOptions"></div>
+    
+    <div class="dialog-buttons">
+      <button class="btn btn-secondary" onclick="closeReassignDialog()">Cancel</button>
+      <button class="btn btn-primary" onclick="confirmReassignment()">Save Changes</button>
+    </div>
+  </div>
+  
+  <!-- Load external dependencies -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  
+  <!-- Load application modules -->
+  <script src="utils.js"></script>
+  <script src="data.js"></script>
+  <script src="map.js"></script>
+  <script src="ui.js"></script>
+  <script src="region-cluster-manager.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

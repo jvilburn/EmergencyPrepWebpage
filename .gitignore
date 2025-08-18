@@ -1,0 +1,18 @@
+# Map tiles (downloaded separately for offline use)
+tiles/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.bak
+*.log
