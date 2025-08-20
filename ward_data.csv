@@ -1,184 +1,184 @@
-HouseholdName,Latitude,Longitude,Address,IsIsolated,SpecialNeeds,MedicalSkills,RecoverySkills,RecoveryEquipment,CommunicationSkillsAndEquipment,CommunicationsRegionName,CommunicationsClusterId
-"Banks, Mundi",35.939269,-80.368525,238 Altavista Dr,false,,,,,,Region 1,7
-"Carnline, Darrell",35.939325,-80.368571,238 Altavista Dr,false,,,,,,Region 1,7
-"Collins, Derentz & Linda Faye",35.932303,-80.391852,109 Holly Hill Ct,false,,,,,,Region 1,7
-"Lewis, Joseph & Eden Hannah",35.935889,-80.369889,504 Altavista Dr,false,,,,,,Region 1,7
-"Cox, Paul Wayne",35.952433,-80.435999,141 La Quinta Dr,false,,,,,,Region 1,18
-"Low, Joseph & Barbara E",35.947831,-80.414474,118 Agnes Ln,false,,,,,,Region 1,18
-"Nelson, Caleb & Sydnie Marie",35.957681,-80.413121,334 Potts Rd,false,,,,,,Region 1,18
-"Detrich, Evan Michael",35.899431,-80.379218,123 Zimmerman Rd,false,,,,,,Region 1,19
-"Hall, Misty",35.916577,-80.405805,110 Annie Lane,false,,,,,,Region 1,19
-"Hunter, David Allen",35.925261,-80.404944,107 Shady Grove Ln,false,,,,,,Region 1,31
-"Teuscher, Scott",35.925391,-80.416201,373 Covington Drive,false,,,,,,Region 1,31
-"Murphy, Brian",35.947092,-80.359318,310 Tesh Rd,false,,,,,,Region 1,33
-"Taylor, Dan Roy & Teresa Lynn",35.961274,-80.369296,148 River Pines Trl,false,,,,,,Region 1,33
-"Dixon, Ivan Wayne & Rachael",35.862948,-80.394507,192 Thousand Trails Dr,false,,,,,,Region 1,38
-"Gunn, Steven Douglas & Cynthia Gail",35.943229,-80.457662,154 Princeton Ct,false,,,,,,Region 1,40
-"Przelski, Renee Lynne",35.872827,-80.435368,3454 US Highway 64 E,false,,,,,,Region 1,44
-"Boger, Michael Eugene & Pamela",35.81393,-80.55424,135 Watt St,false,,,,,,West Region,13
-"Innocenzi, Carl",35.836226,-80.559578,116 Hank Lesser Rd,false,,,,,,West Region,13
-"Neely, Anthony Howard",35.812079,-80.559873,28 166 Main St,false,,,,,,West Region,13
-"Sanford, Eric & Randi Racheal",35.833487,-80.563815,644 Gladstone Rd,false,,,,,,West Region,13
-"Swindells, Allen",35.819083,-80.549422,157 Wall St,false,,,,,,West Region,13
-"Alberts, Dylan & Kelsey Nicole",35.873964,-80.589959,245 Feezor Rd,false,,,,,,West Region,15
-"Green, Larry & Debra",35.885815,-80.607699,684 Greenhill Rd,false,,,Handyman (Moderate),"tools, yard tools",,West Region,15
-"Green, Matthew",35.88152,-80.606217,808 Greenhill Road,false,,,,,,West Region,15
-"Greene, James",35.878481,-80.604457,915 Greenhill Rd,false,,,,,,West Region,15
-"Seamon, Randy Bailey & Karen",35.882633,-80.607855,782 Greenhill Road,false,,,,,,West Region,15
-"Brewer, Daniel & Celeste",35.855276,-80.54898,1795 US Highway 601 S,false,,,"Handyman, Automotive, Carpentry, Computer (Expert)","car ramps, linux, table saw, tools, yard tools",,West Region,28
-"Doby, Shyanne",35.862555,-80.543284,249 Deadmon Rd,false,,,,,,West Region,28
-"Hutt, Nevada",35.868833,-80.671683,136 Morrison Rd,false,,,,,,West Region,32
-"Lachapelle, Russell",35.865209,-80.639278,205 Mr Henry Rd,false,,,,,,West Region,32
-"Horton, Jeremy",35.783621,-80.508902,4106 Us Hwy #601 S,false,,,,,,West Region,41
-"Allen, Mark Douglas",36.077195,-80.434216,8495 Grove Creek Dr,false,,,,,,East Region,4
-"Allen, Mary",36.07719,-80.434195,8495 Grove Creek Dr,false,,,,,,East Region,4
-"Allen, Sandra",36.077232,-80.434195,8495 Grove Creek Rd,false,,,,,,East Region,4
-"Barton, William Gregory & Dorothy",36.069275,-80.43186,8848 Kings Tree Rd,false,,,,,,East Region,4
-"Brown, Ryan Troy",36.084856,-80.441105,345 Lewisville Trails Rd,false,,,,,,East Region,4
-"Fry, Chad & Amber",36.07458,-80.465294,2339 Williams Rd,false,,,,,,East Region,4
-"Go, Raymond Vaughn & Brigitte Berta Gartner",36.070017,-80.430821,8843 Homewood Dr,false,,,,,,East Region,4
-"Marlow, Danny & Jackie",36.074638,-80.46534,2345 Williams Rd,false,,,"Handyman (Basic), Technical","chainsaw, tools",,East Region,4
-"Miner, Garret & Whitney Erin",36.075147,-80.430826,8458 Meadow Vista Dr,false,,,,,,East Region,4
-"Mirecki, Richard Alan & Michelle Ann",36.078023,-80.441647,1196 Pebble Meadows Dr,false,,,,,,East Region,4
-"Skinner, Jeffrey Glenn & Kathryn Nicole",36.06756,-80.432717,1819 Pinehurst Dr,false,,,,,,East Region,4
-"Skinner, Kaylee Nevaeh",36.067621,-80.432696,1819 Pinehurst Dr,false,,,,,,East Region,4
-"Steen, Nathan & Kay",36.082795,-80.442675,324 Harvest Mill Dr,false,,,,,,East Region,4
-"Weese, Paul & Leonor Pedroso",36.076379,-80.430426,1026 Compass Rose Ct,false,,,"Handyman, Automotive, Carpentry (Moderate), Computer, Technical (Moderate)","chainsaw, pc",,East Region,4
-"Morris, Larry & June",36.087661,-80.432847,360 Westeba Rd,false,,,,,,East Region,12
-"Smith, Scott & Lori",36.065955,-80.427936,8700 Witherbee Ct,false,,,,,,East Region,12
-"Styers, Wilson & Christiana",36.074984,-80.424374,8275 Lake Ridge Dr,false,,,,,,East Region,12
-"Wittcher, Krystal Lee",36.069439,-80.429131,8826 Homewood Dr,false,,,,,,East Region,12
-"Hammond, Jean",36.019022,-80.488839,1310 Nc Highway 801 N,false,,,,,,East Region,14
-"Perry, Justin",36.011715,-80.462007,193 Woodburn Pl,false,,,,,,East Region,14
-"Vilburn, John & Paula",36.017021,-80.486147,1241 NC Highway 801 N,false,Medical,,"Handyman (Moderate), Computer (Moderate), Technical",,,East Region,14
-"Hiatt, Paul Kevin & Christina Beth",36.086056,-80.478211,230 Nanzetta Way,false,,,,,,East Region,23
-"Rasmussen, Drew & Courtney",36.073638,-80.467894,2112 Hauser Rd,false,,,,,,East Region,23
-"Rosnes, Jon & Michelle",36.095076,-80.478354,110 Nanzetta Way,false,,,,,,East Region,23
-"Nielsen, Daniel Tommy & Terri Jean",36.051377,-80.4192,8151 Center Grove Church Rd,false,,,,,,East Region,24
-"Wagner, Matt & Ana",36.050831,-80.424438,7823 Fairview garden trail,false,,,,,,East Region,24
-"Webb, Chris & Samantha Rae",36.059173,-80.421674,7240 Styers Crossing Ln,false,,,,,,East Region,24
-"Bowman, Melvin & Tammy Kay",36.064811,-80.608437,2401 Courtney Huntsville Rd,false,,,,,,North Region,27
-"Spillman, Steven Ray & Laurie",36.067469,-80.609315,2713 Wishon Rd,false,,,,,,North Region,27
-"Dotson, Debra",35.952779,-80.602604,117 Pepperstone Dr,false,,,,,,North Region,29
-"Hefner, Christopher Jared & Kimberly Elizabeth",35.952248,-80.598935,217 Pepperstone Drive,false,,,,,,North Region,29
-"Freidt, Larry & Pamela",35.962584,-80.689515,281 Davie Farm Trail,false,,,,,,North Region,30
-"Hurley, Robin Annette",35.978042,-80.695487,311 Getta Way,false,,,,,,North Region,30
-"Cudd, Michael",35.983666,-80.611923,619 Richie Road,false,,,,,,North Region,37
-"Edwards, Debra",35.896959,-80.689003,338 Oakland Ave,false,,,,,,North Region,39
-"McDonald, Mark Durant",36.013701,-80.584658,235 Brangus Way,false,,,,,,North Region,42
-"Scell Pigg, Jeffrey & Megan",35.95451,-80.651928,146 Cambridge Lane,false,,,,,,North Region,45
-"Sebastian, Laura Michelle",35.923741,-80.653801,2862 US 64,false,,,,,,North Region,46
-"Walker, Jesse",36.008975,-80.639442,627 Jack Booe Road,false,,,,,,North Region,48
-"Wilson, Christopher",36.03545,-80.656262,2154 Liberty Church Rd,false,,,,,,North Region,49
-"Allen, Michael",35.999268,-80.370739,115 Rivercrest Ct,false,,,,,,South Region,1
-"Belcher, Jericho",35.991972,-80.353734,6028 Stone Blu Dr,false,,,,,,South Region,1
-"Brock, Joshua",36.004348,-80.351584,5739 Midstream Cir,false,,,,,,South Region,1
-"Dzoba, Rodger",35.992037,-80.363368,6055 Littlerock Ct,false,,,,,,South Region,1
-"Edwards, Brent",35.991089,-80.356478,5236 Bridge Pointe Dr,false,,,,,,South Region,1
-"France, Joshua Glen & Jaclyn Mary",36.004996,-80.353073,5798 Misty Hill Cir,false,,,,,,South Region,1
-"Frederick, Barbara Ellen Barnett",35.997621,-80.364356,111 Salem Place Ct,false,,,,,,South Region,1
-"Hiatt, Emily",36.00758,-80.38375,520 Merrybrook Ct,false,,,,,,South Region,1
-"Hiatt, Erwina Lizardo",36.007633,-80.383646,520 Merrybrook Ct,false,,,,,,South Region,1
-"Hiatt, Nancy",36.007576,-80.383748,520 Merrybrook Court,false,,,,,,South Region,1
-"Isenhour, Jordan Thomas",35.990402,-80.359901,5491 Taylors Run Dr,false,,,,,,South Region,1
-"Johnson, Ryan & KacyAnn",35.99011,-80.357092,6013 Shea Meadows Dr,false,,,,,,South Region,1
-"Jones, Kenneth Odell & Mary Rose",36.010243,-80.367617,4565 Jasper Ridge Dr,false,,,,,,South Region,1
-"Louchez, Dominique",36.00481,-80.373368,100 Stonburg Cir,false,,,,,,South Region,1
-"Moeller, Jacob & Emily Sophia",36.007025,-80.372244,4821 Willoughby Grove Road,false,,,,,,South Region,1
-"Russell, Beryl",36.00481,-80.373368,100 Stonburg Cir,false,,,,,,South Region,1
-"Russell, Nate & Lindsey Ann",36.002921,-80.378673,6237 Finch Meadow Ct,false,,,,,,South Region,1
-"Sharples, Matthew & Crystal",36.003404,-80.351792,5479 Misty Hill Cir,false,,,,,,South Region,1
-"St. Jeor, Jeff & Hannah",36.01208,-80.373335,6215 Hamptonburg Rd,false,,,,,,South Region,1
-"Tucker, Karla Rae",35.99039,-80.359869,5491 Taylors Run Drive,false,,,,,,South Region,1
-"Ardmore, Aaron",36.016361,-80.45309,232 Brayden Dr,false,,,,,,East Region,14
-"Donnelly, Donna Lynn",36.001856,-80.426198,125 Fairway Dr,false,,,,,,South Region,2
-"Hannah, Melissa Danielle",36.006859,-80.459686,131 Brentwood Dr,false,,,,,,East Region,14
-"Hansen, Andrew",36.001646,-80.436725,432 Orchard Park Dr,false,,,,,,South Region,2
-"Hansen, Bill & Kathy",36.014816,-80.436542,116 Mill Stone Lane,false,,,"Handyman (Basic), Carpentry, Technical (Basic)",saws,,South Region,2
-"Harwell, Chris & Barbara",36.012879,-80.43602,165 Bridgewater Dr,false,,,,,,South Region,2
-"Hiatt, Andrew Nelson & Kaeli Dawn",36.016258,-80.431413,177 Kilbourne Dr,false,,,,,,South Region,2
-"Mecham, Brenda",36.012987,-80.440902,135 Townpark Drive,false,,,,,,South Region,2
-"Meeker, James Eugene & Lucinda",36.019421,-80.441153,374 Yadkin Valley Rd,false,,,,,,South Region,2
-"Ontiveros, Jakeob & Caitlin",36.014957,-80.435379,220 Bridgewater Dr,false,,,,,,South Region,2
-"Smith, Gary Thomas & Mary",36.015277,-80.434934,247 Ruthie's Way,false,,,,,,South Region,2
-"Tronsen, Lee & Julie",36.016361,-80.45309,232 Brayden Dr,false,,,"Handyman (Basic), Automotive (Basic), Carpentry (Moderate)","chainsaw, tools",,East Region,14
-"Watts, Marla",35.998695,-80.432603,170 Pembrooke Ridge Ct,false,,,,,,South Region,2
-"Wilkins, William & Elizabeth",36.003349,-80.424328,0,false,,,,,,South Region,2
-"Woodruff, Donna Marie",36.019334,-80.449881,383 Hall Walker Lane,false,,,,,,East Region,14
-"Bellows, Peter & Melissa Marie",36.001334,-80.390612,3561 Stancli Rd,false,,,"Handyman (Basic), Automotive (Basic), Computer, Technical (Basic)",,,South Region,3
-"Bennett, Lynn & Nancy",36.006751,-80.396689,603 Ravenhill Ct,false,,,Computer (Moderate),,,South Region,3
-"Bennett, Sindy",36.006804,-80.396707,603 Ravenhill Ct,false,,,,,,South Region,3
-"Corbin, Deborah",36.017889,-80.409862,3944 Westridge Meadow Circle,false,,,,,,South Region,3
-"Davis, Stanley & Lorraine",36.011595,-80.382895,6706 Amberley Lane,false,,,,,,South Region,3
-"Fielding, Tara",36.017249,-80.414527,7126 Riverview Knoll Ct,false,,,,,,South Region,3
-"Goodwill, Rodney",36.013549,-80.388096,6944 Mendelssohn Drive,false,,,,,,South Region,3
-"Hall, Robert E & Sheryl",36.019978,-80.408755,3994 Westridge Meadow Cir,false,,,,,,South Region,3
-"Hellstrom, Jeff & Jill",36.006547,-80.388488,104 Duxbury Ct,false,,,"Handyman, Automotive (Moderate), Carpentry (Expert), Technical (Basic)","chainsaw, compressor, drill press, table saw",,South Region,3
-"Kaselis, Rebecca",36.007427,-80.38641,130 Nottridge Court,false,,,,,,South Region,3
-"Nielsen, Alexander Tommy",36.001306,-80.390649,3561 Stancli Rd,false,,,,,,South Region,3
-"Robinson, Jonathan Lyvon Sr & Alfreda",36.010645,-80.385154,573 Drumheller Rd,false,,,,,,South Region,3
-"Stanfield, Darrell & Emily Michelle",36.015644,-80.388797,6870 Greenbrook Dr,false,,,,,,South Region,3
-"Sutherland, Mr. & Margaret",36.008946,-80.390426,109 Spillsbury Court,false,,,,,,South Region,3
-"Barney, Scott & Sally M Vass",35.984186,-80.422284,174 Ashburton Rd,false,,,,,,South Region,6
-"Huston, Nicolas",35.982084,-80.445604,120 Grasslands Ct,false,,,,,,South Region,6
-"Morra, Danielle",35.985213,-80.434027,127 Suntree Dr,false,,,,,,South Region,6
-"Morra, Jacob",35.985213,-80.434027,127 Suntree Dr,false,,,,,,South Region,6
-"Morra, Julie",35.985213,-80.434027,127 Suntree Drive,false,,,,,,South Region,6
-"Rogers, Jeffrey Brian & Malysa",35.978507,-80.416636,109 Eastridge Ct,false,,,,,,South Region,6
-"Tilley, Jeremy & Royale",35.983442,-80.432379,211 Oakmont Drive,false,,,Handyman Carpentry,"compressor, generator, ladders, nailers, power tools, tools, yard tools",,South Region,6
-"Wheeling, Brian",35.979669,-80.446254,138 Sawgrass Drive,false,,,,,,South Region,6
-"Gardner, Jake",36.031216,-80.37693,6212 Parkfield Ln,false,,,,,,South Region,10
-"Gilley, Richard Haran",36.031822,-80.361624,5907 Puritan Ln,false,,,,,,South Region,10
-"Hester, Ashley Elizabeth",36.047016,-80.360867,208 McTavish Ln,false,,,,,,South Region,10
-"Martin, Wanda Louise",36.031822,-80.361624,5907 Puritan Ln,false,,,,,,South Region,10
-"Miller, Tom & Melissa",36.032669,-80.360397,4525 Woodsman Way,false,,,,,,South Region,10
-"Stockdale, Stephen",36.030175,-80.386872,3810 Willowood Dr,false,,,,,,South Region,10
-"Van Meter, Michelle Diana",36.030721,-80.365713,5991 Cottonwood Ln,false,,,,,,South Region,10
-"Eldredge, Todd & Janell",35.979916,-80.371563,557 Ryder Cup Ln,false,,,,,,South Region,11
-"Flake, Andrew & Sarah",35.98025,-80.341727,3776 Frye Bridge Road,false,,,,,,South Region,11
-"Luntz, John Michael & Raegen Adell Cecil",35.990031,-80.343229,725 Dorchester St,false,,,,,,South Region,11
-"Isenhour, Todd & Kathi Ann",36.027663,-80.449489,755 Yadkin Valley Rd,false,,,,,,East Region,14
-"Nichols, Walter & Marla",36.019737,-80.417386,7967 Abelia Way,false,Medical,,Computer (Moderate),,,South Region,20
-"Tarbet, David & Ariane",36.010226,-80.423415,0,false,,,,,,South Region,20
-"Tronsen, Calla",36.010222,-80.423372,157 Ivy Cir,false,,,,,,South Region,20
-"Scott, Ryan & Angel",35.986399,-80.402298,7610 Peggy Dr,false,,,,,,South Region,21
-"Stewart, Gregory & Lisa",35.978302,-80.376236,308 Ryder Cup Lane,false,,,,,,South Region,21
-"Stewart, Lynn J & Joyce",35.9783,-80.376201,308 Ryder Cup Ln,false,,,,,,South Region,21
-"Barber, Kathryn Sue",35.992412,-80.337898,5410 Quartz Av,false,,,,,,South Region,25
-"Lewis, Landon & Tara",35.989452,-80.335399,801 Dorchester St,false,,,,,,South Region,25
-"Barker, Garrett & Kaylee",36.000881,-80.293949,4815 Mischief Ct,false,,,Technical (Basic),,,South Region,26
-"Parks, James & Crystal",36.01593,-80.26449,223 Scotney Ct,false,,,,,,South Region,26
-"Archie, Cedric Denard & Quriston Robette",36.07531,-80.325997,281 Village Creek Cir,false,,,,,,South Region,36
-"Cheney, Steve & Teralyn",35.890418,-80.51795,151 Marbrook Dr,false,,,,,,Central Region,5
-"Johnson, David & Marla",35.884741,-80.550337,183 Charleston Meadow Loop,false,,,,,,Central Region,5
-"Keenan, William",35.886571,-80.547686,185 Sunnydell Ln,false,,,,,,Central Region,5
-"Poplin, Michael",35.901536,-80.526812,370 Windward Cir,false,,,,,,Central Region,5
-"Warner, Brenda",35.910002,-80.540303,126 Sunset Dr,false,,,,,,Central Region,5
-"Wilson, Jacob",35.901531,-80.533175,132 Hollow Hill Ct,false,,,,,,Central Region,5
-"Younger, Robert Eugene & Shelly Kay",35.902145,-80.528007,474 Mountview Dr,false,,,,,,Central Region,5
-"Bartanen, Leonard Charles & Lisa Mary",35.905849,-80.58173,121 Wilhaven Dr,false,,,,,,Central Region,8
-"Craig, Marie Benge",35.91763,-80.57867,139 Sterling Dr,false,,,,,,Central Region,8
-"Foster, Ruth",35.916794,-80.578887,121 Sterling Dr,false,,,,,,Central Region,8
-"Lowe, Virginia Isabell",35.917,-80.591167,498 Madison Rd,false,,,,,,Central Region,8
-"Reppond, Savannah Lynn",35.905516,-80.575095,140 Camden Point Ct,false,,,,,,Central Region,8
-"Berghorn, Vernon Joseph",35.949777,-80.534664,2581 US Highway 158,false,,,,,,Central Region,9
-"Jenkins, Michael & Anna",35.926481,-80.530777,435 Sain Road,false,,,,,,Central Region,9
-"Kriel, Sophia",35.93643,-80.553345,303 Main Church Rd,false,,,,,,Central Region,9
-"Snyman, Maria",35.93643,-80.553345,146 Camden Point Ct,false,,,,,,Central Region,9
-"Warner, Todd & Elizabeth",35.921535,-80.54097,184 W Knoll Brook Dr,false,,,,,,Central Region,9
-"Beatty, Stephen Lance & Shirley",35.989128,-80.496133,149 Dare Ln,false,,,,,,Central Region,16
-"Lahue, Michael Allyn",35.979231,-80.492776,188 Livingston Rd,false,,,,,,Central Region,16
-"Wilson, Joshua David & Patricia Ann",35.991288,-80.468915,159 Longwood Dr,false,,,,,,Central Region,16
-"Wilson, Laura Ann",35.99133,-80.468915,159 Longwood Dr,false,,,,,,Central Region,16
-"Dant, Steven Tyler & April Victoria Omega",35.907992,-80.489999,892 Cornatzer Rd,false,,,,,,Central Region,17
-"Dotson, Robert Edward",35.909674,-80.461012,415 Comanche Dr,false,,,,,,Central Region,17
-"Gilley, Teresa Rene",35.922356,-80.476657,169 Ralph Rd,false,,,,,,Central Region,17
-"Henninger, Jeremiah",35.927077,-80.495979,2076 Milling Rd,false,,,,,,Central Region,22
-"Mecham, Elden",35.941723,-80.517375,401 Foster Dairy Road,false,,,,,,Central Region,22
-"Wilson, Matthew Gregory",36.010671,-80.525591,210 Droke Cir,false,,,,,,Central Region,35
-"Wilson, Tonya",36.010632,-80.525535,210 Droke Cir,false,,,,,,Central Region,35
-"Patterson, BJ & Kylie",35.900143,-80.559795,276 Park Ave,false,,,,,,Central Region,43
-"Taulbee, Hunter",35.912586,-80.526839,127 Eli Ave,false,,,,,,Central Region,47
-"Winn, Donald",35.966478,-80.499196,3516 US-159,false,,,,,,Central Region,50
-"Andrews, Jocelyn",36.2641,-80.356239,201 Forrest Oaks Dr,true,,,,,,,-1
-"Hiatt, Nicholas & Katie",38.039549,-78.43614,287 James Way,true,,,Handyman,"tools, yard tools",,,-1
+HouseholdName,Latitude,Longitude,Address,SpecialNeeds,MedicalSkills,RecoverySkills,RecoveryEquipment,CommunicationSkillsAndEquipment,CommunicationsRegionName,CommunicationsClusterId
+"Banks, Mundi",35.939269,-80.368525,238 Altavista Dr,,,,,,Region 1,7
+"Carnline, Darrell",35.939325,-80.368571,238 Altavista Dr,,,,,,Region 1,7
+"Collins, Derentz & Linda Faye",35.932303,-80.391852,109 Holly Hill Ct,,,,,,Region 1,7
+"Lewis, Joseph & Eden Hannah",35.935889,-80.369889,504 Altavista Dr,,,,,,Region 1,7
+"Cox, Paul Wayne",35.952433,-80.435999,141 La Quinta Dr,,,,,,Region 1,18
+"Low, Joseph & Barbara E",35.947831,-80.414474,118 Agnes Ln,,,,,,Region 1,18
+"Nelson, Caleb & Sydnie Marie",35.957681,-80.413121,334 Potts Rd,,,,,,Region 1,18
+"Detrich, Evan Michael",35.899431,-80.379218,123 Zimmerman Rd,,,,,,Region 1,19
+"Hall, Misty",35.916577,-80.405805,110 Annie Lane,,,,,,Region 1,19
+"Hunter, David Allen",35.925261,-80.404944,107 Shady Grove Ln,,,,,,Region 1,31
+"Teuscher, Scott",35.925391,-80.416201,373 Covington Drive,,,,,,Region 1,31
+"Murphy, Brian",35.947092,-80.359318,310 Tesh Rd,,,,,,Region 1,33
+"Taylor, Dan Roy & Teresa Lynn",35.961274,-80.369296,148 River Pines Trl,,,,,,Region 1,33
+"Dixon, Ivan Wayne & Rachael",35.862948,-80.394507,192 Thousand Trails Dr,,,,,,Region 1,38
+"Gunn, Steven Douglas & Cynthia Gail",35.943229,-80.457662,154 Princeton Ct,,,,,,Region 1,40
+"Przelski, Renee Lynne",35.872827,-80.435368,3454 US Highway 64 E,,,,,,Region 1,44
+"Boger, Michael Eugene & Pamela",35.81393,-80.55424,135 Watt St,,,,,,West Region,13
+"Innocenzi, Carl",35.836226,-80.559578,116 Hank Lesser Rd,,,,,,West Region,13
+"Neely, Anthony Howard",35.812079,-80.559873,28 166 Main St,,,,,,West Region,13
+"Sanford, Eric & Randi Racheal",35.833487,-80.563815,644 Gladstone Rd,,,,,,West Region,13
+"Swindells, Allen",35.819083,-80.549422,157 Wall St,,,,,,West Region,13
+"Alberts, Dylan & Kelsey Nicole",35.873964,-80.589959,245 Feezor Rd,,,,,,West Region,15
+"Green, Larry & Debra",35.885815,-80.607699,684 Greenhill Rd,,,Handyman (Moderate),"tools, yard tools",,West Region,15
+"Green, Matthew",35.88152,-80.606217,808 Greenhill Road,,,,,,West Region,15
+"Greene, James",35.878481,-80.604457,915 Greenhill Rd,,,,,,West Region,15
+"Seamon, Randy Bailey & Karen",35.882633,-80.607855,782 Greenhill Road,,,,,,West Region,15
+"Brewer, Daniel & Celeste",35.855276,-80.54898,1795 US Highway 601 S,,,"Handyman, Automotive, Carpentry, Computer (Expert)","car ramps, linux, table saw, tools, yard tools",,West Region,28
+"Doby, Shyanne",35.862555,-80.543284,249 Deadmon Rd,,,,,,West Region,28
+"Hutt, Nevada",35.868833,-80.671683,136 Morrison Rd,,,,,,West Region,32
+"Lachapelle, Russell",35.865209,-80.639278,205 Mr Henry Rd,,,,,,West Region,32
+"Horton, Jeremy",35.783621,-80.508902,4106 Us Hwy #601 S,,,,,,West Region,41
+"Allen, Mark Douglas",36.077195,-80.434216,8495 Grove Creek Dr,,,,,,East Region,4
+"Allen, Mary",36.07719,-80.434195,8495 Grove Creek Dr,,,,,,East Region,4
+"Allen, Sandra",36.077232,-80.434195,8495 Grove Creek Rd,,,,,,East Region,4
+"Barton, William Gregory & Dorothy",36.069275,-80.43186,8848 Kings Tree Rd,,,,,,East Region,4
+"Brown, Ryan Troy",36.084856,-80.441105,345 Lewisville Trails Rd,,,,,,East Region,4
+"Fry, Chad & Amber",36.07458,-80.465294,2339 Williams Rd,,,,,,East Region,4
+"Go, Raymond Vaughn & Brigitte Berta Gartner",36.070017,-80.430821,8843 Homewood Dr,,,,,,East Region,4
+"Marlow, Danny & Jackie",36.074638,-80.46534,2345 Williams Rd,,,"Handyman (Basic), Technical","chainsaw, tools",,East Region,4
+"Miner, Garret & Whitney Erin",36.075147,-80.430826,8458 Meadow Vista Dr,,,,,,East Region,4
+"Mirecki, Richard Alan & Michelle Ann",36.078023,-80.441647,1196 Pebble Meadows Dr,,,,,,East Region,4
+"Skinner, Jeffrey Glenn & Kathryn Nicole",36.06756,-80.432717,1819 Pinehurst Dr,,,,,,East Region,4
+"Skinner, Kaylee Nevaeh",36.067621,-80.432696,1819 Pinehurst Dr,,,,,,East Region,4
+"Steen, Nathan & Kay",36.082795,-80.442675,324 Harvest Mill Dr,,,,,,East Region,4
+"Weese, Paul & Leonor Pedroso",36.076379,-80.430426,1026 Compass Rose Ct,,,"Handyman, Automotive, Carpentry (Moderate), Computer, Technical (Moderate)","chainsaw, pc",,East Region,4
+"Morris, Larry & June",36.087661,-80.432847,360 Westeba Rd,,,,,,East Region,12
+"Smith, Scott & Lori",36.065955,-80.427936,8700 Witherbee Ct,,,,,,East Region,12
+"Styers, Wilson & Christiana",36.074984,-80.424374,8275 Lake Ridge Dr,,,,,,East Region,12
+"Wittcher, Krystal Lee",36.069439,-80.429131,8826 Homewood Dr,,,,,,East Region,12
+"Hammond, Jean",36.019022,-80.488839,1310 Nc Highway 801 N,,,,,,East Region,14
+"Perry, Justin",36.011715,-80.462007,193 Woodburn Pl,,,,,,East Region,14
+"Vilburn, John & Paula",36.017021,-80.486147,1241 NC Highway 801 N,Medical,,"Handyman (Moderate), Computer (Moderate), Technical",,,East Region,14
+"Hiatt, Paul Kevin & Christina Beth",36.086056,-80.478211,230 Nanzetta Way,,,,,,East Region,23
+"Rasmussen, Drew & Courtney",36.073638,-80.467894,2112 Hauser Rd,,,,,,East Region,23
+"Rosnes, Jon & Michelle",36.095076,-80.478354,110 Nanzetta Way,,,,,,East Region,23
+"Nielsen, Daniel Tommy & Terri Jean",36.051377,-80.4192,8151 Center Grove Church Rd,,,,,,East Region,24
+"Wagner, Matt & Ana",36.050831,-80.424438,7823 Fairview garden trail,,,,,,East Region,24
+"Webb, Chris & Samantha Rae",36.059173,-80.421674,7240 Styers Crossing Ln,,,,,,East Region,24
+"Bowman, Melvin & Tammy Kay",36.064811,-80.608437,2401 Courtney Huntsville Rd,,,,,,North Region,27
+"Spillman, Steven Ray & Laurie",36.067469,-80.609315,2713 Wishon Rd,,,,,,North Region,27
+"Dotson, Debra",35.952779,-80.602604,117 Pepperstone Dr,,,,,,North Region,29
+"Hefner, Christopher Jared & Kimberly Elizabeth",35.952248,-80.598935,217 Pepperstone Drive,,,,,,North Region,29
+"Freidt, Larry & Pamela",35.962584,-80.689515,281 Davie Farm Trail,,,,,,North Region,30
+"Hurley, Robin Annette",35.978042,-80.695487,311 Getta Way,,,,,,North Region,30
+"Cudd, Michael",35.983666,-80.611923,619 Richie Road,,,,,,North Region,37
+"Edwards, Debra",35.896959,-80.689003,338 Oakland Ave,,,,,,North Region,39
+"McDonald, Mark Durant",36.013701,-80.584658,235 Brangus Way,,,,,,North Region,42
+"Scell Pigg, Jeffrey & Megan",35.95451,-80.651928,146 Cambridge Lane,,,,,,North Region,45
+"Sebastian, Laura Michelle",35.923741,-80.653801,2862 US 64,,,,,,North Region,46
+"Walker, Jesse",36.008975,-80.639442,627 Jack Booe Road,,,,,,North Region,48
+"Wilson, Christopher",36.03545,-80.656262,2154 Liberty Church Rd,,,,,,North Region,49
+"Allen, Michael",35.999268,-80.370739,115 Rivercrest Ct,,,,,,South Region,1
+"Belcher, Jericho",35.991972,-80.353734,6028 Stone Blu Dr,,,,,,South Region,1
+"Brock, Joshua",36.004348,-80.351584,5739 Midstream Cir,,,,,,South Region,1
+"Dzoba, Rodger",35.992037,-80.363368,6055 Littlerock Ct,,,,,,South Region,1
+"Edwards, Brent",35.991089,-80.356478,5236 Bridge Pointe Dr,,,,,,South Region,1
+"France, Joshua Glen & Jaclyn Mary",36.004996,-80.353073,5798 Misty Hill Cir,,,,,,South Region,1
+"Frederick, Barbara Ellen Barnett",35.997621,-80.364356,111 Salem Place Ct,,,,,,South Region,1
+"Hiatt, Emily",36.00758,-80.38375,520 Merrybrook Ct,,,,,,South Region,1
+"Hiatt, Erwina Lizardo",36.007633,-80.383646,520 Merrybrook Ct,,,,,,South Region,1
+"Hiatt, Nancy",36.007576,-80.383748,520 Merrybrook Court,,,,,,South Region,1
+"Isenhour, Jordan Thomas",35.990402,-80.359901,5491 Taylors Run Dr,,,,,,South Region,1
+"Johnson, Ryan & KacyAnn",35.99011,-80.357092,6013 Shea Meadows Dr,,,,,,South Region,1
+"Jones, Kenneth Odell & Mary Rose",36.010243,-80.367617,4565 Jasper Ridge Dr,,,,,,South Region,1
+"Louchez, Dominique",36.00481,-80.373368,100 Stonburg Cir,,,,,,South Region,1
+"Moeller, Jacob & Emily Sophia",36.007025,-80.372244,4821 Willoughby Grove Road,,,,,,South Region,1
+"Russell, Beryl",36.00481,-80.373368,100 Stonburg Cir,,,,,,South Region,1
+"Russell, Nate & Lindsey Ann",36.002921,-80.378673,6237 Finch Meadow Ct,,,,,,South Region,1
+"Sharples, Matthew & Crystal",36.003404,-80.351792,5479 Misty Hill Cir,,,,,,South Region,1
+"St. Jeor, Jeff & Hannah",36.01208,-80.373335,6215 Hamptonburg Rd,,,,,,South Region,1
+"Tucker, Karla Rae",35.99039,-80.359869,5491 Taylors Run Drive,,,,,,South Region,1
+"Ardmore, Aaron",36.016361,-80.45309,232 Brayden Dr,,,,,,East Region,14
+"Donnelly, Donna Lynn",36.001856,-80.426198,125 Fairway Dr,,,,,,South Region,2
+"Hannah, Melissa Danielle",36.006859,-80.459686,131 Brentwood Dr,,,,,,East Region,14
+"Hansen, Andrew",36.001646,-80.436725,432 Orchard Park Dr,,,,,,South Region,2
+"Hansen, Bill & Kathy",36.014816,-80.436542,116 Mill Stone Lane,,,"Handyman (Basic), Carpentry, Technical (Basic)",saws,,South Region,2
+"Harwell, Chris & Barbara",36.012879,-80.43602,165 Bridgewater Dr,,,,,,South Region,2
+"Hiatt, Andrew Nelson & Kaeli Dawn",36.016258,-80.431413,177 Kilbourne Dr,,,,,,South Region,2
+"Mecham, Brenda",36.012987,-80.440902,135 Townpark Drive,,,,,,South Region,2
+"Meeker, James Eugene & Lucinda",36.019421,-80.441153,374 Yadkin Valley Rd,,,,,,South Region,2
+"Ontiveros, Jakeob & Caitlin",36.014957,-80.435379,220 Bridgewater Dr,,,,,,South Region,2
+"Smith, Gary Thomas & Mary",36.015277,-80.434934,247 Ruthie's Way,,,,,,South Region,2
+"Tronsen, Lee & Julie",36.016361,-80.45309,232 Brayden Dr,,,"Handyman (Basic), Automotive (Basic), Carpentry (Moderate)","chainsaw, tools",,East Region,14
+"Watts, Marla",35.998695,-80.432603,170 Pembrooke Ridge Ct,,,,,,South Region,2
+"Wilkins, William & Elizabeth",36.003349,-80.424328,0,,,,,,South Region,2
+"Woodruff, Donna Marie",36.019334,-80.449881,383 Hall Walker Lane,,,,,,East Region,14
+"Bellows, Peter & Melissa Marie",36.001334,-80.390612,3561 Stancli Rd,,,"Handyman (Basic), Automotive (Basic), Computer, Technical (Basic)",,,South Region,3
+"Bennett, Lynn & Nancy",36.006751,-80.396689,603 Ravenhill Ct,,,Computer (Moderate),,,South Region,3
+"Bennett, Sindy",36.006804,-80.396707,603 Ravenhill Ct,,,,,,South Region,3
+"Corbin, Deborah",36.017889,-80.409862,3944 Westridge Meadow Circle,,,,,,South Region,3
+"Davis, Stanley & Lorraine",36.011595,-80.382895,6706 Amberley Lane,,,,,,South Region,3
+"Fielding, Tara",36.017249,-80.414527,7126 Riverview Knoll Ct,,,,,,South Region,3
+"Goodwill, Rodney",36.013549,-80.388096,6944 Mendelssohn Drive,,,,,,South Region,3
+"Hall, Robert E & Sheryl",36.019978,-80.408755,3994 Westridge Meadow Cir,,,,,,South Region,3
+"Hellstrom, Jeff & Jill",36.006547,-80.388488,104 Duxbury Ct,,,"Handyman, Automotive (Moderate), Carpentry (Expert), Technical (Basic)","chainsaw, compressor, drill press, table saw",,South Region,3
+"Kaselis, Rebecca",36.007427,-80.38641,130 Nottridge Court,,,,,,South Region,3
+"Nielsen, Alexander Tommy",36.001306,-80.390649,3561 Stancli Rd,,,,,,South Region,3
+"Robinson, Jonathan Lyvon Sr & Alfreda",36.010645,-80.385154,573 Drumheller Rd,,,,,,South Region,3
+"Stanfield, Darrell & Emily Michelle",36.015644,-80.388797,6870 Greenbrook Dr,,,,,,South Region,3
+"Sutherland, Mr. & Margaret",36.008946,-80.390426,109 Spillsbury Court,,,,,,South Region,3
+"Barney, Scott & Sally M Vass",35.984186,-80.422284,174 Ashburton Rd,,,,,,South Region,6
+"Huston, Nicolas",35.982084,-80.445604,120 Grasslands Ct,,,,,,South Region,6
+"Morra, Danielle",35.985213,-80.434027,127 Suntree Dr,,,,,,South Region,6
+"Morra, Jacob",35.985213,-80.434027,127 Suntree Dr,,,,,,South Region,6
+"Morra, Julie",35.985213,-80.434027,127 Suntree Drive,,,,,,South Region,6
+"Rogers, Jeffrey Brian & Malysa",35.978507,-80.416636,109 Eastridge Ct,,,,,,South Region,6
+"Tilley, Jeremy & Royale",35.983442,-80.432379,211 Oakmont Drive,,,Handyman Carpentry,"compressor, generator, ladders, nailers, power tools, tools, yard tools",,South Region,6
+"Wheeling, Brian",35.979669,-80.446254,138 Sawgrass Drive,,,,,,South Region,6
+"Gardner, Jake",36.031216,-80.37693,6212 Parkfield Ln,,,,,,South Region,10
+"Gilley, Richard Haran",36.031822,-80.361624,5907 Puritan Ln,,,,,,South Region,10
+"Hester, Ashley Elizabeth",36.047016,-80.360867,208 McTavish Ln,,,,,,South Region,10
+"Martin, Wanda Louise",36.031822,-80.361624,5907 Puritan Ln,,,,,,South Region,10
+"Miller, Tom & Melissa",36.032669,-80.360397,4525 Woodsman Way,,,,,,South Region,10
+"Stockdale, Stephen",36.030175,-80.386872,3810 Willowood Dr,,,,,,South Region,10
+"Van Meter, Michelle Diana",36.030721,-80.365713,5991 Cottonwood Ln,,,,,,South Region,10
+"Eldredge, Todd & Janell",35.979916,-80.371563,557 Ryder Cup Ln,,,,,,South Region,11
+"Flake, Andrew & Sarah",35.98025,-80.341727,3776 Frye Bridge Road,,,,,,South Region,11
+"Luntz, John Michael & Raegen Adell Cecil",35.990031,-80.343229,725 Dorchester St,,,,,,South Region,11
+"Isenhour, Todd & Kathi Ann",36.027663,-80.449489,755 Yadkin Valley Rd,,,,,,East Region,14
+"Nichols, Walter & Marla",36.019737,-80.417386,7967 Abelia Way,Medical,,Computer (Moderate),,,South Region,20
+"Tarbet, David & Ariane",36.010226,-80.423415,0,,,,,,South Region,20
+"Tronsen, Calla",36.010222,-80.423372,157 Ivy Cir,,,,,,South Region,20
+"Scott, Ryan & Angel",35.986399,-80.402298,7610 Peggy Dr,,,,,,South Region,21
+"Stewart, Gregory & Lisa",35.978302,-80.376236,308 Ryder Cup Lane,,,,,,South Region,21
+"Stewart, Lynn J & Joyce",35.9783,-80.376201,308 Ryder Cup Ln,,,,,,South Region,21
+"Barber, Kathryn Sue",35.992412,-80.337898,5410 Quartz Av,,,,,,South Region,25
+"Lewis, Landon & Tara",35.989452,-80.335399,801 Dorchester St,,,,,,South Region,25
+"Barker, Garrett & Kaylee",36.000881,-80.293949,4815 Mischief Ct,,,Technical (Basic),,,South Region,26
+"Parks, James & Crystal",36.01593,-80.26449,223 Scotney Ct,,,,,,South Region,26
+"Archie, Cedric Denard & Quriston Robette",36.07531,-80.325997,281 Village Creek Cir,,,,,,South Region,36
+"Cheney, Steve & Teralyn",35.890418,-80.51795,151 Marbrook Dr,,,,,,Central Region,5
+"Johnson, David & Marla",35.884741,-80.550337,183 Charleston Meadow Loop,,,,,,Central Region,5
+"Keenan, William",35.886571,-80.547686,185 Sunnydell Ln,,,,,,Central Region,5
+"Poplin, Michael",35.901536,-80.526812,370 Windward Cir,,,,,,Central Region,5
+"Warner, Brenda",35.910002,-80.540303,126 Sunset Dr,,,,,,Central Region,5
+"Wilson, Jacob",35.901531,-80.533175,132 Hollow Hill Ct,,,,,,Central Region,5
+"Younger, Robert Eugene & Shelly Kay",35.902145,-80.528007,474 Mountview Dr,,,,,,Central Region,5
+"Bartanen, Leonard Charles & Lisa Mary",35.905849,-80.58173,121 Wilhaven Dr,,,,,,Central Region,8
+"Craig, Marie Benge",35.91763,-80.57867,139 Sterling Dr,,,,,,Central Region,8
+"Foster, Ruth",35.916794,-80.578887,121 Sterling Dr,,,,,,Central Region,8
+"Lowe, Virginia Isabell",35.917,-80.591167,498 Madison Rd,,,,,,Central Region,8
+"Reppond, Savannah Lynn",35.905516,-80.575095,140 Camden Point Ct,,,,,,Central Region,8
+"Berghorn, Vernon Joseph",35.949777,-80.534664,2581 US Highway 158,,,,,,Central Region,9
+"Jenkins, Michael & Anna",35.926481,-80.530777,435 Sain Road,,,,,,Central Region,9
+"Kriel, Sophia",35.93643,-80.553345,303 Main Church Rd,,,,,,Central Region,9
+"Snyman, Maria",35.93643,-80.553345,146 Camden Point Ct,,,,,,Central Region,9
+"Warner, Todd & Elizabeth",35.921535,-80.54097,184 W Knoll Brook Dr,,,,,,Central Region,9
+"Beatty, Stephen Lance & Shirley",35.989128,-80.496133,149 Dare Ln,,,,,,Central Region,16
+"Lahue, Michael Allyn",35.979231,-80.492776,188 Livingston Rd,,,,,,Central Region,16
+"Wilson, Joshua David & Patricia Ann",35.991288,-80.468915,159 Longwood Dr,,,,,,Central Region,16
+"Wilson, Laura Ann",35.99133,-80.468915,159 Longwood Dr,,,,,,Central Region,16
+"Dant, Steven Tyler & April Victoria Omega",35.907992,-80.489999,892 Cornatzer Rd,,,,,,Central Region,17
+"Dotson, Robert Edward",35.909674,-80.461012,415 Comanche Dr,,,,,,Central Region,17
+"Gilley, Teresa Rene",35.922356,-80.476657,169 Ralph Rd,,,,,,Central Region,17
+"Henninger, Jeremiah",35.927077,-80.495979,2076 Milling Rd,,,,,,Central Region,22
+"Mecham, Elden",35.941723,-80.517375,401 Foster Dairy Road,,,,,,Central Region,22
+"Wilson, Matthew Gregory",36.010671,-80.525591,210 Droke Cir,,,,,,Central Region,35
+"Wilson, Tonya",36.010632,-80.525535,210 Droke Cir,,,,,,Central Region,35
+"Patterson, BJ & Kylie",35.900143,-80.559795,276 Park Ave,,,,,,Central Region,43
+"Taulbee, Hunter",35.912586,-80.526839,127 Eli Ave,,,,,,Central Region,47
+"Winn, Donald",35.966478,-80.499196,3516 US-159,,,,,,Central Region,50
+"Andrews, Jocelyn",36.2641,-80.356239,201 Forrest Oaks Dr,,,,,,,-1
+"Hiatt, Nicholas & Katie",38.039549,-78.43614,287 James Way,,,Handyman,"tools, yard tools",,,-1

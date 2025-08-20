@@ -498,7 +498,7 @@ input[type="file"] {
   display: block;
 }
 
-/* Reassignment Dialog */
+/* Household Edit Dialog */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -514,7 +514,7 @@ input[type="file"] {
   display: block;
 }
 
-.reassign-dialog {
+.household-edit-dialog {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -531,7 +531,7 @@ input[type="file"] {
   display: none;
 }
 
-.reassign-dialog.active {
+.household-edit-dialog.active {
   display: block;
 }
 
@@ -559,13 +559,13 @@ input[type="file"] {
   font-size: 14px;
 }
 
-.reassign-options {
+.household-options {
   max-height: 300px;
   overflow-y: auto;
   margin: 15px 0;
 }
 
-.reassign-option {
+.household-option {
   padding: 12px;
   margin: 8px 0;
   border: 2px solid #ecf0f1;
@@ -574,23 +574,23 @@ input[type="file"] {
   transition: all 0.2s;
 }
 
-.reassign-option:hover {
+.household-option:hover {
   background: #f8f9fa;
   border-color: #3498db;
 }
 
-.reassign-option.selected {
+.household-option.selected {
   background: #ebf5fb;
   border-color: #3498db;
 }
 
-.reassign-option.current {
+.household-option.current {
   background: #e8f6f3;
   border-color: #27ae60;
   position: relative;
 }
 
-.reassign-option.current::after {
+.household-option.current::after {
   content: '✓ Current';
   position: absolute;
   top: 10px;

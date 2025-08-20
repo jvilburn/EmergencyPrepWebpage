@@ -39,7 +39,7 @@ python3 tile-downloader.py
 ```
 
 ### Testing the Application
-- Load CSV data with proper 12-column format
+- Load CSV data with proper 11-column format
 - Test default "By Name" sort vs "By Communication Region" sort
 - Verify resource filtering functionality (Special Needs, skills, equipment)
 - Test resource filter persistence after page refresh
@@ -51,25 +51,24 @@ python3 tile-downloader.py
 ## Architecture & Key Components
 
 ### CSV Data Format
-Current CSV format with 12 columns (order matters):
+Current CSV format with 11 columns (order matters):
 1. **HouseholdName** - Family name
 2. **Latitude** - Decimal latitude
 3. **Longitude** - Decimal longitude
 4. **Address** - Street address (optional)
-5. **IsIsolated** - Boolean (true/false)
-6. **SpecialNeeds** - Text field for special needs information
-7. **MedicalSkills** - Text field for medical skills/training
-8. **RecoverySkills** - Text field for recovery/disaster response skills
-9. **RecoveryEquipment** - Text field for recovery/disaster response equipment
-10. **CommunicationSkillsAndEquipment** - Text field for communication capabilities
-11. **CommunicationsRegionName** - Region display name for communications
-12. **CommunicationsClusterId** - Integer cluster ID for communications
+5. **SpecialNeeds** - Text field for special needs information
+6. **MedicalSkills** - Text field for medical skills/training
+7. **RecoverySkills** - Text field for recovery/disaster response skills
+8. **RecoveryEquipment** - Text field for recovery/disaster response equipment
+9. **CommunicationSkillsAndEquipment** - Text field for communication capabilities
+10. **CommunicationsRegionName** - Region display name for communications
+11. **CommunicationsClusterId** - Integer cluster ID for communications
 
 **Format Notes:**
 - Region/cluster info is derived from CommunicationsRegionName and CommunicationsClusterId
+- Isolation status is derived from households having neither region nor cluster assignment
 - All text fields support comma-separated lists for multiple items
 - Resource filtering dynamically discovers available items from text fields
-- Boolean fields accept: true/false, True/False
 
 ### Key JavaScript Components
 

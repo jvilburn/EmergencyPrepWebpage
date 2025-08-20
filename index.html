@@ -10,34 +10,35 @@
   <!-- Sidebar -->
   <div id="sidebar">
     <div class="sidebar-header">
-      <button class="hamburger-menu" onclick="toggleHamburgerMenu()" title="Menu">☰</button>
+      <button class="hamburger-menu" title="Menu">☰</button>
       <h3>📋 Households</h3>
-      <button class="sidebar-toggle" onclick="toggleSidebar()" title="Collapse sidebar">◀</button>
+      <button class="sidebar-toggle" title="Collapse sidebar">◀</button>
     </div>
     
     <!-- Hamburger Menu -->
-    <div class="hamburger-dropdown" id="hamburgerMenu" onclick="event.stopPropagation()">
+    <div class="hamburger-dropdown" id="hamburgerMenu">
       <div class="menu-section">
         <h4>📁 File Operations</h4>
-        <button onclick="triggerFileLoad(); toggleHamburgerMenu()">📂 Load CSV</button>
-        <button onclick="exportData(); toggleHamburgerMenu()">💾 Save CSV</button>
-        <button onclick="exportMissingTilesReport(); toggleHamburgerMenu()">🗺️ Export Missing Tiles</button>
-        <button onclick="showMissingTilesCount(); toggleHamburgerMenu()">🔍 Check Missing Count</button>
+        <button>📂 Load CSV</button>
+        <button>💾 Save CSV</button>
+        <button>🗺️ Export Missing Tiles</button>
+        <button>🔍 Check Missing Count</button>
+        <button>📋 Download Instructions</button>
       </div>
       <div class="menu-section">
         <h4>📊 View</h4>
-        <button onclick="showStatistics(); toggleHamburgerMenu()">📈 Statistics</button>
-        <button onclick="showLegend(); toggleHamburgerMenu()">🎨 Legend</button>
-        <button onclick="resetView(); toggleHamburgerMenu()">🏠 Reset View</button>
-        <button onclick="toggleClusters(); toggleHamburgerMenu()" id="clusterMenuBtn">👁️ Toggle Clusters</button>
+        <button>📈 Statistics</button>
+        <button>🎨 Legend</button>
+        <button>🏠 Reset View</button>
+        <button id="clusterMenuBtn">👁️ Toggle Clusters</button>
       </div>
       <div class="menu-section">
         <h4>✏️ Edit</h4>
-        <button onclick="showRegionClusterPanel(); toggleHamburgerMenu()">🗺️ Manage Regions</button>
-        <button onclick="viewChanges(); toggleHamburgerMenu()">📝 View Changes</button>
-        <button onclick="undoLastChange(); toggleHamburgerMenu()">↶ Undo Last</button>
-        <button onclick="clearHighlights(); toggleHamburgerMenu()">🔦 Clear Highlights</button>
-        <button onclick="clearMissingTilesTracking(); toggleHamburgerMenu()">🗑️ Clear Missing Tiles</button>
+        <button>🗺️ Manage Regions</button>
+        <button>📝 View Changes</button>
+        <button>↶ Undo Last</button>
+        <button>🔦 Clear Highlights</button>
+        <button>🗑️ Clear Missing Tiles</button>
       </div>
     </div>
     <div class="sidebar-controls">
@@ -45,14 +46,14 @@
       
       <!-- Collapsible Household List -->
       <div class="collapsible-section">
-        <div class="collapsible-header" onclick="toggleHouseholdList()">
+        <div class="collapsible-header">
           <span>👥 Household List</span>
           <span class="expand-icon" id="householdListIcon">▶</span>
         </div>
         <div class="collapsible-content collapsed" id="householdListSection">
           <div class="sort-buttons">
-            <button class="sort-btn active" onclick="setSortMode('name')">By Name</button>
-            <button class="sort-btn" onclick="setSortMode('region')">By Communication Region</button>
+            <button class="sort-btn active">By Name</button>
+            <button class="sort-btn">By Communication Region</button>
           </div>
           <ul class="household-list" id="householdList"></ul>
         </div>
@@ -60,7 +61,7 @@
       
       <!-- Collapsible Resource Filters -->
       <div class="collapsible-section">
-        <div class="collapsible-header" onclick="toggleResourceFilters()">
+        <div class="collapsible-header">
           <span>🔧 Resource Filters</span>
           <span class="expand-icon" id="resourceFiltersIcon">▶</span>
         </div>
@@ -90,20 +91,20 @@
     <span id="changesIndicator" class="hidden">📝 0 changes</span>
   </div>
   
-  <!-- Reassignment Dialog -->
-  <div class="modal-overlay" id="modalOverlay" onclick="closeReassignDialog()"></div>
-  <div class="reassign-dialog" id="reassignDialog">
+  <!-- Household Edit Dialog -->
+  <div class="modal-overlay" id="modalOverlay"></div>
+  <div class="household-edit-dialog" id="householdEditDialog">
     <div class="dialog-header">
       <h3>Edit Household</h3>
       <div id="selectedHousehold" class="household-info"></div>
       <div id="currentAssignment" class="current-assignment"></div>
     </div>
     
-    <div class="reassign-options" id="reassignOptions"></div>
+    <div class="household-options" id="householdOptions"></div>
     
     <div class="dialog-buttons">
-      <button class="btn btn-secondary" onclick="closeReassignDialog()">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmReassignment()">Save Changes</button>
+      <button class="btn btn-secondary" id="cancelHouseholdBtn">Cancel</button>
+      <button class="btn btn-primary" id="confirmHouseholdBtn">Save Changes</button>
     </div>
   </div>
   
@@ -112,11 +113,30 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   
   <!-- Load application modules -->
-  <script src="utils.js"></script>
-  <script src="data.js"></script>
-  <script src="map.js"></script>
-  <script src="ui.js"></script>
-  <script src="region-cluster-manager.js"></script>
+  <!-- Foundation layer -->
+  <script src="household.js"></script>
+  <script src="state-manager.js"></script>
+  <script src="status-manager.js"></script>
+  <script src="data-layer.js"></script>
+  
+  <!-- Core modules -->
+  <script src="map-manager.js"></script>
+  <script src="tile-manager.js"></script>
+  <script src="file-manager.js"></script>
+  
+  <!-- UI modules (load in dependency order) -->
+  <script src="ui/sidebar.js"></script>
+  <script src="ui/household-list.js"></script>
+  <script src="ui/resource-filters.js"></script>
+  <script src="ui/highlighting.js"></script>
+  <script src="ui/ui-manager.js"></script>
+  
+  <!-- Additional modules -->
+  <script src="region-cluster-manager-class.js"></script>
+  <script src="event-manager.js"></script>
+  
+  <!-- Application initialization -->
   <script src="app.js"></script>
+  <script src="app-bootstrap.js"></script>
 </body>
 </html>

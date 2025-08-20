@@ -2,54 +2,11 @@
 
 // Global application state
 let editMode = false;
+let selectedHousehold = null;
 
-// Initialize application
-window.addEventListener('DOMContentLoaded', async function() {
-  setupFileHandlers();
-  await initMap();
-  checkOfflineStatus();
-  loadSavedData();
-  setStatus('Ready - Load your ward CSV file', 'info');
-  buildHouseholdList();
-});
+// Application initialization is now handled by AppBootstrap
 
-// Setup file handlers
-function setupFileHandlers() {
-  const fileInput = document.getElementById('fileInput');
-  
-  if (fileInput) {
-    fileInput.addEventListener('change', (e) => {
-      console.log('File input changed, files:', e.target.files.length);
-      if (e.target.files.length > 0) {
-        const file = e.target.files[0];
-        console.log('Loading file:', file.name);
-        loadFile(file);
-        // Reset the input AFTER processing to allow reloading same file
-        setTimeout(() => {
-          e.target.value = '';
-        }, 100);
-      }
-    });
-  } else {
-    console.error('File input element not found');
-  }
-  
-  // Also allow drag and drop on the entire map
-  const mapElement = document.getElementById('map');
-  if (mapElement) {
-    mapElement.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-    });
-    
-    mapElement.addEventListener('drop', (e) => {
-      e.preventDefault();
-      if (e.dataTransfer.files.length > 0) {
-        loadFile(e.dataTransfer.files[0]);
-      }
-    });
-  }
-}
+// File handling is now managed by FileManager class
 
 // Toggle edit mode
 function toggleEditMode() {
@@ -62,34 +19,28 @@ function toggleEditMode() {
   if (editMode) {
     toggle.classList.add('active');
     indicator.classList.add('active');
-    if (window.map) {
-      window.map.getContainer().style.cursor = 'pointer';
-    }
+    window.map.getContainer().style.cursor = 'pointer';
   } else {
     toggle.classList.remove('active');
     indicator.classList.remove('active');
-    if (window.map) {
-      window.map.getContainer().style.cursor = '';
-    }
+    window.map.getContainer().style.cursor = '';
   }
   
   // Update all marker popups to show/hide edit instructions
-  if (window.wardData) {
-    window.wardData.forEach(household => {
-      const marker = window.markers[household.id];
-      if (marker) {
-        updateMarkerPopup(household, marker);
-      }
-    });
-  }
+  const households = window.stateManager.getAllHouseholds();
+  households.forEach(household => {
+    const marker = window.stateManager.getMapMarker(household.id);
+    if (marker) {
+      window.mapManager.updateMarkerPopup(household, marker);
+    }
+  });
   
   clearHighlights();
 }
 
-// Open reassignment dialog for household editing
-function openReassignDialog(household) {
+// Open household edit dialog
+function openHouseholdEditDialog(household) {
   selectedHousehold = household;
-  selectedNewAssignment = null;
   
   let dialogHtml = `
     <div style="margin-bottom: 10px;">
@@ -149,12 +100,11 @@ function openReassignDialog(household) {
   // Build region options
   dialogHtml += `<option value="-1" ${household.isIsolated ? 'selected' : ''}>Isolated</option>`;
   
-  if (window.regionStats) {
-    Object.entries(window.regionStats).forEach(([regionId, region]) => {
-      const selected = !household.isIsolated && household.regionId === parseInt(regionId) ? 'selected' : '';
-      dialogHtml += `<option value="${regionId}" ${selected}>${region.name}</option>`;
-    });
-  }
+  const regionStats = window.stateManager.getRegionStats();
+  regionStats.forEach((region, regionName) => {
+    const selected = !household.isIsolated() && household.communicationsRegionName === regionName ? 'selected' : '';
+    dialogHtml += `<option value="${regionName}" ${selected}>${region.name}</option>`;
+  });
   
   dialogHtml += `
           </select>
@@ -172,18 +122,18 @@ function openReassignDialog(household) {
   dialogHtml += `
     </div>
     <div class="dialog-buttons">
-      <button class="btn btn-secondary" onclick="closeReassignDialog()">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmReassignment()">Save Changes</button>
+      <button class="btn btn-secondary" id="cancelHouseholdBtn">Cancel</button>
+      <button class="btn btn-primary" id="confirmHouseholdBtn">Save Changes</button>
     </div>
   `;
   
-  document.getElementById('reassignDialog').innerHTML = dialogHtml;
+  document.getElementById('householdEditDialog').innerHTML = dialogHtml;
   
   // Initialize cluster options based on current region
   updateClusterOptions();
   
   document.getElementById('modalOverlay').classList.add('active');
-  document.getElementById('reassignDialog').classList.add('active');
+  document.getElementById('householdEditDialog').classList.add('active');
 }
 
 // Update cluster dropdown options based on selected region
@@ -206,18 +156,19 @@ function updateClusterOptions() {
     clusterSelect.disabled = false;
     
     // Add clusters for the selected region
-    if (window.regionStats && window.regionStats[selectedRegionId]) {
-      const clusters = Array.from(window.regionStats[selectedRegionId].clusters).sort((a, b) => a - b);
-      clusters.forEach(clusterId => {
+    const regionStats = window.stateManager.getRegionStats();
+    if (regionStats && regionStats.get(selectedRegionId)) {
+      const clusters = Array.from(regionStats.get(selectedRegionId).clusters).sort((a, b) => a - b);
+      clusters.forEach(communicationsClusterId => {
         const option = document.createElement('option');
-        option.value = clusterId;
-        option.textContent = `Cluster ${clusterId}`;
+        option.value = communicationsClusterId;
+        option.textContent = `Cluster ${communicationsClusterId}`;
         clusterSelect.appendChild(option);
       });
       
       // Set current cluster selection if household is in this region
       if (!selectedHousehold.isIsolated && selectedHousehold.regionId === selectedRegionId) {
-        clusterSelect.value = selectedHousehold.clusterId;
+        clusterSelect.value = selectedHousehold.communicationsClusterId;
       }
     }
   }
@@ -227,18 +178,23 @@ function updateClusterOptions() {
 window.updateClusterOptions = updateClusterOptions;
 
 // Confirm household edits
-function confirmReassignment() {
+function confirmHouseholdEdit() {
+  if (!selectedHousehold) {
+    console.error('No household selected for editing');
+    return;
+  }
+  
   // Get all field values
   const basicInfo = {
-    name: document.getElementById('edit-name').value.trim(),
-    address: document.getElementById('edit-address').value.trim(),
-    lat: parseFloat(document.getElementById('edit-lat').value),
-    lon: parseFloat(document.getElementById('edit-lon').value),
-    specialNeeds: document.getElementById('edit-special-needs').value.trim(),
-    medicalSkills: document.getElementById('edit-medical-skills').value.trim(),
-    recoverySkills: document.getElementById('edit-recovery-skills').value.trim(),
-    recoveryEquipment: document.getElementById('edit-recovery-equipment').value.trim(),
-    communicationSkillsAndEquipment: document.getElementById('edit-communication-skills-and-equipment').value.trim()
+    name: document.getElementById('edit-name')?.value.trim() || '',
+    address: document.getElementById('edit-address')?.value.trim() || '',
+    lat: parseFloat(document.getElementById('edit-lat')?.value || selectedHousehold.lat),
+    lon: parseFloat(document.getElementById('edit-lon')?.value || selectedHousehold.lon),
+    specialNeeds: document.getElementById('edit-special-needs')?.value.trim() || '',
+    medicalSkills: document.getElementById('edit-medical-skills')?.value.trim() || '',
+    recoverySkills: document.getElementById('edit-recovery-skills')?.value.trim() || '',
+    recoveryEquipment: document.getElementById('edit-recovery-equipment')?.value.trim() || '',
+    communicationSkillsAndEquipment: document.getElementById('edit-communication-skills-and-equipment')?.value.trim() || ''
   };
   
   // Get region/cluster values from dropdowns
@@ -247,7 +203,7 @@ function confirmReassignment() {
   
   // Check if region assignment changed
   const regionChanged = (selectedRegionId !== selectedHousehold.regionId) || 
-                       (selectedClusterId !== selectedHousehold.clusterId);
+                       (selectedClusterId !== selectedHousehold.communicationsClusterId);
   
   // Check if basic info changed
   const basicInfoChanged = 
@@ -262,59 +218,67 @@ function confirmReassignment() {
     basicInfo.communicationSkillsAndEquipment !== (selectedHousehold.communicationSkillsAndEquipment || '');
   
   if (!regionChanged && !basicInfoChanged) {
-    closeReassignDialog();
+    closeHouseholdEditDialog();
     return;
   }
   
-  // Update household assignment if changed
+  // Prepare updates object
+  const updates = {};
+  
+  // Add region changes if changed
   if (regionChanged) {
-    const regionName = selectedRegionId === -1 ? '' : 
-      (window.regionStats[selectedRegionId] ? window.regionStats[selectedRegionId].name : `Region ${selectedRegionId}`);
+    const regionStats = window.stateManager.getRegionStats();
+    const communicationsRegionName = selectedRegionId === -1 ? '' : 
+      (regionStats.get(selectedRegionId) ? regionStats.get(selectedRegionId).name : `Region ${selectedRegionId}`);
     
-    const newAssignment = {
-      regionId: selectedRegionId,
-      clusterId: selectedClusterId,
-      regionName: regionName
-    };
-    
-    updateHouseholdAssignment(selectedHousehold, newAssignment);
+    updates.regionId = selectedRegionId;
+    updates.communicationsClusterId = selectedClusterId;
+    updates.communicationsRegionName = communicationsRegionName;
   }
   
-  // Update basic information
+  // Add basic info changes if changed
   if (basicInfoChanged) {
-    updateHouseholdResources(selectedHousehold, basicInfo);
+    Object.assign(updates, basicInfo);
+  }
+  
+  // Update StateManager once with all changes
+  if (regionChanged || basicInfoChanged) {
+    window.stateManager.updateHousehold(selectedHousehold.id, updates);
+    // Also update local reference for UI purposes
+    Object.assign(selectedHousehold, updates);
   }
   
   // Update marker if region changed
   if (regionChanged) {
-    updateMarkerAfterChange(selectedHousehold);
+    // Update marker appearance through MapManager
+    window.mapManager.updateMarkerAfterChange(selectedHousehold);
   }
   
   // Always update popup to show new resources
-  const marker = window.markers[selectedHousehold.id];
-  updateMarkerPopup(selectedHousehold, marker);
+  const marker = window.stateManager?.getMapMarker(selectedHousehold.id);
+  if (marker) {
+    window.mapManager.updateMarkerPopup(selectedHousehold, marker);
+  }
   
   // If basic info changed, refresh resource discovery and filters
   if (basicInfoChanged) {
-    if (window.updateDiscoveredResources) {
-      window.updateDiscoveredResources();
-    }
-    if (window.buildResourceFilters) {
-      window.buildResourceFilters();
-    }
+    // Update discovered resources
+    window.stateManager.updateDiscoveredResources();
+    
+    // Rebuild resource filters
+    window.resourceFilters.rebuild();
   }
   
   if (regionChanged) {
-    recalculateStatistics();
-    updateBoundaries();
-    updateChangesCounter();
-    buildHouseholdList();
+    window.mapManager.updateBoundaries();
+    window.stateManager.notify('ui:changes:updated');
+    window.householdList.rebuild();
   }
   
-  saveDataLocally();
-  closeReassignDialog();
+  window.dataLayer.saveToLocalStorage();
+  closeHouseholdEditDialog();
   
-  let msg = `Updated ${selectedHousehold.name}`;
+  let msg = `Updated ${selectedHousehold?.name || 'household'}`;
   const changes = [];
   if (regionChanged) changes.push('region');
   if (basicInfoChanged) changes.push('info');
@@ -322,15 +286,14 @@ function confirmReassignment() {
   if (changes.length > 0) {
     msg += ` (${changes.join(', ')})`;
   }
-  setStatus(msg, 'success');
+  window.statusManager.success(msg);
 }
 
-// Close reassignment dialog
-function closeReassignDialog() {
+// Close household edit dialog
+function closeHouseholdEditDialog() {
   document.getElementById('modalOverlay').classList.remove('active');
-  document.getElementById('reassignDialog').classList.remove('active');
+  document.getElementById('householdEditDialog').classList.remove('active');
   selectedHousehold = null;
-  selectedNewAssignment = null;
 }
 
 // Show household selection dialog for co-located households
@@ -341,15 +304,15 @@ function showHouseholdSelectionDialog(households) {
       <div class="household-info">Multiple households at this location</div>
     </div>
     
-    <div class="reassign-options">
+    <div class="household-options">
   `;
   
   households.forEach(household => {
     const assignment = household.isIsolated ? 'Isolated' : 
-      `${household.regionName}, Cluster ${household.clusterId}`;
+      `${household.communicationsRegionName}, Cluster ${household.communicationsClusterId}`;
     
     dialogHtml += `
-      <div class="reassign-option" onclick="selectHouseholdForEdit('${household.id}')">
+      <div class="household-option" data-household-id="${household.id}">
         <div class="option-title">${household.name}</div>
         <div class="option-details">${assignment}</div>
       </div>
@@ -359,40 +322,72 @@ function showHouseholdSelectionDialog(households) {
   dialogHtml += `
     </div>
     <div class="dialog-buttons">
-      <button class="btn btn-secondary" onclick="closeReassignDialog()">Cancel</button>
+      <button class="btn btn-secondary" id="cancelSelectBtn">Cancel</button>
     </div>
   `;
   
-  document.getElementById('reassignDialog').innerHTML = dialogHtml;
+  document.getElementById('householdEditDialog').innerHTML = dialogHtml;
   document.getElementById('modalOverlay').classList.add('active');
-  document.getElementById('reassignDialog').classList.add('active');
+  document.getElementById('householdEditDialog').classList.add('active');
 }
 
 // Select household for editing from co-located households
 function selectHouseholdForEdit(householdId) {
-  const household = window.wardData.find(h => h.id === householdId);
+  const household = window.stateManager ? window.stateManager.getHousehold(householdId) : null;
   if (household) {
-    closeReassignDialog();
-    setTimeout(() => openReassignDialog(household), 100);
+    closeHouseholdEditDialog();
+    openHouseholdEditDialog(household);
   }
 }
+
+// Load saved data (called by AppBootstrap)
+async function loadSavedData() {
+  try {
+    const savedData = await window.dataLayer.loadFromLocalStorage();
+    if (savedData && savedData.households.length > 0) {
+      console.log(`Loaded ${savedData.households.length} households from localStorage`);
+      window.statusManager.success(`Loaded ${savedData.households.length} households from localStorage`);
+      window.mapManager.createMapMarkers();
+      window.mapManager.updateBoundaries();
+    }
+  } catch (error) {
+    console.error('Error loading saved data:', error);
+    window.statusManager.error('Error loading saved data');
+  }
+}
+
+// Export loadSavedData for AppBootstrap
+window.loadSavedData = loadSavedData;
 
 // Expose global functions and state
 window.editMode = editMode;
 window.selectedHousehold = selectedHousehold;
-window.selectedNewAssignment = selectedNewAssignment;
 window.toggleEditMode = toggleEditMode;
-window.openReassignDialog = openReassignDialog;
-window.selectReassignment = selectReassignment;
-window.confirmReassignment = confirmReassignment;
-window.closeReassignDialog = closeReassignDialog;
+window.openHouseholdEditDialog = openHouseholdEditDialog;
+window.confirmHouseholdEdit = confirmHouseholdEdit;
+window.closeHouseholdEditDialog = closeHouseholdEditDialog;
 window.showHouseholdSelectionDialog = showHouseholdSelectionDialog;
 window.selectHouseholdForEdit = selectHouseholdForEdit;
 
-// Export the main action functions to global scope for HTML onclick handlers
-window.resetView = resetView;
-window.clearHighlights = clearHighlights;
-window.toggleClusters = toggleClusters;
-window.viewChanges = viewChanges;
-window.undoLastChange = undoLastChange;
-window.exportData = exportData;
+// File operations are now handled by FileManager class
+
+// Clear highlights function
+function clearHighlights() {
+  window.highlightingManager.clearHighlights();
+}
+
+// HTML events are now handled by EventManager
+
+// Function to set household edit functions on EventManager (called by AppBootstrap)
+window.setupHouseholdEditFunctions = function() {
+  if (window.eventManager && window.openHouseholdEditDialog) {
+    window.eventManager.setHouseholdEditFunctions(
+      window.openHouseholdEditDialog,
+      window.closeHouseholdEditDialog,
+      window.confirmHouseholdEdit
+    );
+    console.log('✓ Household edit functions set on EventManager');
+    return true;
+  }
+  return false;
+};
