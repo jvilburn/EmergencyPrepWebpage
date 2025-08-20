@@ -276,6 +276,8 @@ body {
   justify-content: space-between;
   align-items: center;
   transition: all 0.2s;
+  pointer-events: auto;
+  user-select: none;
 }
 
 .household-item:hover {
@@ -284,9 +286,38 @@ body {
 }
 
 .household-item.highlighted {
-  background: #d1ecf1;
-  border-left: 3px solid #0c5460;
-  font-weight: bold;
+  background: #ffeaa7 !important;
+  border-left: 4px solid #fdcb6e !important;
+  font-weight: 600 !important;
+  box-shadow: 0 2px 4px rgba(253, 203, 110, 0.3) !important;
+  z-index: 1;
+  opacity: 1 !important;
+}
+
+/* When highlighting is active, dim non-highlighted items in sidebar */
+.has-highlights .household-item:not(.highlighted) {
+  opacity: 0.4 !important;
+  transition: opacity 0.2s;
+  color: #999 !important;
+}
+
+.has-highlights .household-item:not(.highlighted):hover {
+  opacity: 0.7 !important;
+  background: #f8f9fa !important;
+  color: #666 !important;
+}
+
+/* Also apply to nested structures */
+#sidebar.has-highlights .household-item:not(.highlighted) {
+  opacity: 0.4 !important;
+  transition: opacity 0.2s;
+  color: #999 !important;
+}
+
+#sidebar.has-highlights .household-item:not(.highlighted):hover {
+  opacity: 0.7 !important;
+  background: #f8f9fa !important;
+  color: #666 !important;
 }
 
 .household-item.isolated {

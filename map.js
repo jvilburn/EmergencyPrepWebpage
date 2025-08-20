@@ -291,14 +291,30 @@ function createMapMarkers() {
     
     // Add hover effects
     marker.on('mouseover', function() {
-      if (!window.highlightedItems || !window.highlightedItems.has(household.id)) {
+      // Only apply hover if not part of highlighted set and not dimmed
+      if (!window.highlightedItems || window.highlightedItems.size === 0) {
+        // No active highlights, normal hover behavior
         this.setStyle({ fillOpacity: 1, weight: 3 });
+      } else if (window.highlightedItems.has(household.id)) {
+        // This household is highlighted, maintain highlight state
+        return;
+      } else {
+        // Other households are highlighted, this one is dimmed - subtle hover (Resource Filters style)
+        this.setStyle({ radius: 7, weight: 2, opacity: 0.4, fillOpacity: 0.4 });
       }
     });
     
     marker.on('mouseout', function() {
-      if (!window.highlightedItems || !window.highlightedItems.has(household.id)) {
-        this.setStyle({ fillOpacity: 0.9, weight: 2 });
+      // Restore appropriate state based on highlights
+      if (!window.highlightedItems || window.highlightedItems.size === 0) {
+        // No active highlights, restore normal state
+        this.setStyle({ fillOpacity: 0.8, weight: 2, opacity: 1 });
+      } else if (window.highlightedItems.has(household.id)) {
+        // This household is highlighted, maintain highlight state
+        return;
+      } else {
+        // Other households are highlighted, restore dimmed state (Resource Filters style)
+        this.setStyle({ radius: 6, weight: 1, opacity: 0.3, fillOpacity: 0.3 });
       }
     });
     

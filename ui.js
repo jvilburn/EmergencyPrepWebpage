@@ -539,11 +539,18 @@ function buildHouseholdList() {
 
 // Build list sorted by name
 function buildListByName(container) {
+  console.log('buildListByName called');
+  
   const sortedHouseholds = [...window.wardData].sort((a, b) => 
     a.name.localeCompare(b.name)
   );
   
-  sortedHouseholds.forEach(household => {
+  console.log(`Processing ${sortedHouseholds.length} households`);
+  
+  sortedHouseholds.forEach((household, index) => {
+    console.log(`Creating household item ${index + 1}/${sortedHouseholds.length}: ${household.name} (ID: ${household.id})`);
+    
+    
     const li = document.createElement('li');
     li.className = 'household-item';
     if (household.isIsolated) li.classList.add('isolated');
@@ -565,9 +572,33 @@ function buildListByName(container) {
       <span style="font-size: 11px; color: #6c757d;">${assignment}</span>
     `;
     
-    li.onclick = () => highlightHousehold(household.id);
+    // Simplified click handler
+    li.addEventListener('click', (event) => {
+      console.log('Household item clicked, ID:', household.id);
+      console.log('About to call highlightHousehold...');
+      
+      try {
+        console.log('About to call highlightHouseholdInUI with ID:', household.id);
+        
+        // Call our UI highlighting function directly
+        highlightHouseholdInUI(household.id);
+        console.log('highlightHouseholdInUI completed successfully');
+      } catch (error) {
+        console.error('Error calling highlightHouseholdInUI:', error);
+        console.error('Error stack:', error.stack);
+      }
+      
+      event.stopPropagation();
+      event.preventDefault();
+    });
     
+    console.log(`Added onclick handler for household ${household.name} (${household.id})`);
     container.appendChild(li);
+    
+    // Verify the element was added and has the right attributes
+    console.log('Added element:', li);
+    console.log('Element dataset:', li.dataset);
+    console.log('Element classes:', li.className);
   });
 }
 
@@ -678,8 +709,17 @@ function buildListByRegion(container) {
         householdItem.dataset.clusterId = `${regionId}-${clusterId}`;
         
         householdItem.innerHTML = `<span>${household.name}</span>`;
-        householdItem.onclick = () => highlightHousehold(household.id);
+        householdItem.addEventListener('click', (event) => {
+          console.log('Cluster household item clicked, ID:', household.id);
+          try {
+            highlightHouseholdInUI(household.id);
+          } catch (error) {
+            console.error('Error in cluster highlight:', error);
+          }
+          event.stopPropagation();
+        });
         
+        console.log(`Added onclick handler for cluster household ${household.name} (${household.id})`);
         clusterGroup.appendChild(householdItem);
       });
       
@@ -726,8 +766,17 @@ function buildListByRegion(container) {
       householdItem.dataset.address = household.address || '';
       
       householdItem.innerHTML = `<span>${household.name}</span>`;
-      householdItem.onclick = () => highlightHousehold(household.id);
+      householdItem.addEventListener('click', (event) => {
+        console.log('Isolated household item clicked, ID:', household.id);
+        try {
+          highlightHouseholdInUI(household.id);
+        } catch (error) {
+          console.error('Error in isolated highlight:', error);
+        }
+        event.stopPropagation();
+      });
       
+      console.log(`Added onclick handler for isolated household ${household.name} (${household.id})`);
       isolatedGroup.appendChild(householdItem);
     });
     
@@ -735,37 +784,185 @@ function buildListByRegion(container) {
   }
 }
 
-// Highlight individual household
-function highlightHousehold(householdId) {
-  clearHighlights();
+// Dim all households (reduces opacity for all markers)
+function dimAllHouseholds() {
+  console.log('dimAllHouseholds: Starting...');
+  
+  if (!window.markers) {
+    console.log('dimAllHouseholds: No markers available');
+    return;
+  }
+  
+  console.log('dimAllHouseholds: Processing', Object.keys(window.markers).length, 'markers');
+  
+  Object.keys(window.markers).forEach(householdId => {
+    const marker = window.markers[householdId];
+    if (marker) {
+      // Store original styles if not already stored
+      if (!marker._originalStyles) {
+        marker._originalStyles = {
+          radius: marker.options.radius,
+          weight: marker.options.weight,
+          opacity: marker.options.opacity,
+          fillOpacity: marker.options.fillOpacity
+        };
+      }
+      
+      // Dim the marker using Resource Filters style
+      marker.setStyle({
+        radius: 6,
+        weight: 1,
+        opacity: 0.3,
+        fillOpacity: 0.3
+      });
+    }
+  });
+}
+
+// Restore all households to normal opacity
+function restoreAllHouseholds() {
+  if (!window.markers) return;
+  
+  Object.keys(window.markers).forEach(householdId => {
+    const marker = window.markers[householdId];
+    if (marker && marker._originalStyles) {
+      marker.setStyle(marker._originalStyles);
+      delete marker._originalStyles;
+    } else if (marker) {
+      // Fallback to default styles
+      marker.setStyle({
+        radius: 8,
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.8
+      });
+    }
+  });
+}
+
+// Highlight individual household in UI
+function highlightHouseholdInUI(householdId) {
+  console.log('=== highlightHouseholdInUI FUNCTION START ===');
+  console.log('highlightHouseholdInUI called with ID:', householdId);
+  console.log('Type of householdId:', typeof householdId);
+  
+  try {
+    clearHighlights();
+    console.log('clearHighlights completed');
+  } catch (error) {
+    console.error('Error in clearHighlights:', error);
+    return;
+  }
   
   const household = window.wardData.find(h => h.id === householdId);
-  if (!household) return;
+  if (!household) {
+    console.log('ERROR: Household not found for ID:', householdId);
+    return;
+  }
+  console.log('Found household:', household.name);
+  
+  // First dim all households
+  console.log('Calling dimAllHouseholds...');
+  dimAllHouseholds();
+  console.log('dimAllHouseholds completed');
+  
+  // Add class to sidebar to enable dimming styles
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.classList.add('has-highlights');
+    console.log('Added has-highlights class to sidebar');
+    console.log('Sidebar classes:', sidebar.className);
+    
+    // Force update all household items immediately with inline styles as backup
+    const allItems = sidebar.querySelectorAll('.household-item');
+    console.log(`Found ${allItems.length} household items in sidebar`);
+    
+    allItems.forEach((item, index) => {
+      const itemId = item.dataset.householdId;
+      console.log(`Item ${index}: ID=${itemId}, Selected=${itemId === householdId}`);
+      
+      if (!itemId || itemId !== householdId) {
+        // This is not the highlighted item, dim it
+        console.log(`Dimming item ${index} (${itemId})`);
+        item.style.opacity = '0.4';
+        item.style.color = '#999';
+        item.style.transition = 'opacity 0.2s, color 0.2s';
+        item.style.background = '';
+        
+        // Verify styles were applied
+        const computedStyles = window.getComputedStyle(item);
+        console.log(`Applied dim styles to ${itemId}: opacity=${computedStyles.opacity}, color=${computedStyles.color}`);
+      } else {
+        console.log(`NOT dimming selected item ${index} (${itemId})`);
+      }
+    });
+  } else {
+    console.log('Sidebar element not found');
+  }
   
   const marker = window.markers[householdId];
   if (marker) {
-    marker._originalRadius = marker.options.radius;
-    marker._originalWeight = marker.options.weight;
-    
+    // Apply highlight styles using Resource Filters style (green highlight)
     marker.setStyle({
       radius: 12,
       weight: 4,
       opacity: 1,
-      fillOpacity: 1
+      fillOpacity: 1,
+      fillColor: '#28a745'  // Green for highlighted household
     });
     
-    highlightedItems.add(householdId);
-    marker.openPopup();
-    if (window.map) {
-      window.map.setView([household.lat, household.lon], Math.max(window.map.getZoom(), 14));
+    // Bring to front like Resource Filters do
+    if (marker.bringToFront) {
+      marker.bringToFront();
     }
+    
+    highlightedItems.add(householdId);
   }
   
-  const listItem = document.querySelector(`[data-household-id="${householdId}"]`);
-  if (listItem) {
-    listItem.classList.add('highlighted');
-    listItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Find and highlight all instances of this household in the sidebar
+  const listItems = document.querySelectorAll(`[data-household-id="${householdId}"]`);
+  console.log(`Looking for items with data-household-id="${householdId}"`);
+  console.log(`Found ${listItems.length} household items to highlight`);
+  
+  if (listItems.length === 0) {
+    console.log('WARNING: No items found to highlight! Checking all items in sidebar...');
+    const allItems = document.querySelectorAll('.household-item');
+    console.log(`Total household items in DOM: ${allItems.length}`);
+    allItems.forEach((item, idx) => {
+      console.log(`Item ${idx}: data-household-id="${item.dataset.householdId}"`);
+    });
   }
+  
+  listItems.forEach((listItem, index) => {
+    console.log(`Highlighting item ${index}:`, listItem);
+    console.log(`Item current styles before: opacity=${listItem.style.opacity}, background=${listItem.style.background}`);
+    
+    listItem.classList.add('highlighted');
+    
+    // Also force highlight styles inline as backup
+    listItem.style.background = '#ffeaa7 !important';
+    listItem.style.borderLeft = '4px solid #fdcb6e';
+    listItem.style.fontWeight = '600';
+    listItem.style.opacity = '1 !important';
+    listItem.style.boxShadow = '0 2px 4px rgba(253, 203, 110, 0.3)';
+    listItem.style.color = '#333 !important';
+    
+    console.log(`Item styles after: opacity=${listItem.style.opacity}, background=${listItem.style.background}`);
+    console.log('Item classes after adding highlighted:', listItem.className);
+    
+    // Check computed styles
+    const computed = window.getComputedStyle(listItem);
+    console.log(`Computed styles: opacity=${computed.opacity}, background=${computed.backgroundColor}, color=${computed.color}`);
+  });
+  
+  // No scrolling - keep current sidebar position like Resource Filters
+  
+  // Debug: Check all household items and their classes
+  const allHouseholdItems = document.querySelectorAll('.household-item');
+  console.log(`Total household items in sidebar: ${allHouseholdItems.length}`);
+  allHouseholdItems.forEach((item, index) => {
+    console.log(`Item ${index} - ID: ${item.dataset.householdId}, Classes: ${item.className}`);
+  });
   
   // Open edit dialog if in edit mode
   if (window.editMode && window.openReassignDialog) {
@@ -781,13 +978,20 @@ function highlightRegion(regionId) {
     !h.isIsolated && h.regionId === parseInt(regionId)
   );
   
+  // First dim all households
+  dimAllHouseholds();
+  
+  // Add class to sidebar to enable dimming styles
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.classList.add('has-highlights');
+  }
+  
   const bounds = [];
   regionHouseholds.forEach(household => {
     const marker = window.markers[household.id];
     if (marker) {
-      marker._originalRadius = marker.options.radius;
-      marker._originalWeight = marker.options.weight;
-      
+      // Apply highlight styles (overriding the dimmed state)
       marker.setStyle({
         radius: 10,
         weight: 3,
@@ -797,6 +1001,12 @@ function highlightRegion(regionId) {
       
       highlightedItems.add(household.id);
       bounds.push([household.lat, household.lon]);
+      
+      // Also highlight in sidebar
+      const listItems = document.querySelectorAll(`[data-household-id="${household.id}"]`);
+      listItems.forEach(listItem => {
+        listItem.classList.add('highlighted');
+      });
     }
   });
   
@@ -823,13 +1033,20 @@ function highlightCluster(regionId, clusterId) {
     h.clusterId === parseInt(clusterId)
   );
   
+  // First dim all households
+  dimAllHouseholds();
+  
+  // Add class to sidebar to enable dimming styles
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.classList.add('has-highlights');
+  }
+  
   const bounds = [];
   clusterHouseholds.forEach(household => {
     const marker = window.markers[household.id];
     if (marker) {
-      marker._originalRadius = marker.options.radius;
-      marker._originalWeight = marker.options.weight;
-      
+      // Apply highlight styles (overriding the dimmed state)
       marker.setStyle({
         radius: 10,
         weight: 3,
@@ -839,6 +1056,12 @@ function highlightCluster(regionId, clusterId) {
       
       highlightedItems.add(household.id);
       bounds.push([household.lat, household.lon]);
+      
+      // Also highlight in sidebar
+      const listItems = document.querySelectorAll(`[data-household-id="${household.id}"]`);
+      listItems.forEach(listItem => {
+        listItem.classList.add('highlighted');
+      });
     }
   });
   
@@ -857,28 +1080,46 @@ function highlightCluster(regionId, clusterId) {
 
 // Clear all highlights
 function clearHighlights() {
-  highlightedItems.forEach(item => {
-    if (typeof item === 'string') {
-      if (item.startsWith('region-') || item.startsWith('cluster-')) {
-        return;
-      }
-    }
+  console.log('clearHighlights called');
+  
+  // Restore all households to normal state
+  restoreAllHouseholds();
+  
+  // Remove highlight class from sidebar
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar) {
+    sidebar.classList.remove('has-highlights');
+    console.log('Removed has-highlights class from sidebar');
+  }
+  
+  // Clear sidebar highlights
+  const highlightedElements = document.querySelectorAll('.highlighted');
+  console.log(`Found ${highlightedElements.length} highlighted elements to clear`);
+  
+  highlightedElements.forEach(item => {
+    console.log('Removing highlighted class from:', item);
+    item.classList.remove('highlighted');
     
-    const marker = window.markers[item];
-    if (marker && marker._originalRadius !== undefined) {
-      marker.setStyle({
-        radius: marker._originalRadius || 8,
-        weight: marker._originalWeight || 2,
-        opacity: 1,
-        fillOpacity: 0.9
-      });
-      delete marker._originalRadius;
-      delete marker._originalWeight;
-    }
+    // Clear inline styles
+    item.style.background = '';
+    item.style.borderLeft = '';
+    item.style.fontWeight = '';
+    item.style.opacity = '';
+    item.style.boxShadow = '';
+    item.style.color = '';
+    item.style.transition = '';
   });
   
-  document.querySelectorAll('.highlighted').forEach(item => {
-    item.classList.remove('highlighted');
+  // Also clear any inline styles from all household items
+  const allHouseholdItems = document.querySelectorAll('.household-item');
+  allHouseholdItems.forEach(item => {
+    item.style.opacity = '';
+    item.style.color = '';
+    item.style.transition = '';
+    item.style.background = '';
+    item.style.borderLeft = '';
+    item.style.fontWeight = '';
+    item.style.boxShadow = '';
   });
   
   highlightedItems.clear();
@@ -948,7 +1189,8 @@ window.applyResourceFilters = applyResourceFilters;
 window.clearResourceFilters = clearResourceFilters;
 window.updateSidebarFooter = updateSidebarFooter;
 window.buildHouseholdList = buildHouseholdList;
-window.highlightHousehold = highlightHousehold;
+window.highlightHouseholdInUI = highlightHouseholdInUI;
+window.highlightHousehold = highlightHouseholdInUI; // Keep backward compatibility
 window.highlightRegion = highlightRegion;
 window.highlightCluster = highlightCluster;
 window.clearHighlights = clearHighlights;
