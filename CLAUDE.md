@@ -18,10 +18,11 @@ EmergencyPrepWebpage/          # Main offline ward map application
 ├── ui.js                      # User interface components
 ├── utils.js                   # Utility functions
 ├── styles.css                 # Styling
-├── tile-downloader.py         # Python script for downloading offline map tiles
-├── tiles/                     # Offline map tiles (generated)
-│   ├── osm/                  # Street map tiles
-│   └── satellite/            # Satellite imagery tiles
+├── tiles/                     # Offline map tiles and manifests
+│   ├── osm/                  # Street map tiles (z/x/y format)
+│   ├── satellite/            # Satellite imagery tiles (z/y/x format)  
+│   ├── osm-manifest.js       # OSM tile availability manifest
+│   └── satellite-manifest.js # Satellite tile availability manifest
 └── ward_data_merged_simple.csv # Household data
 ```
 
@@ -32,11 +33,16 @@ EmergencyPrepWebpage/          # Main offline ward map application
 2. **Load data**: Drag and drop a CSV file onto the application or use the file picker
 
 ### Downloading Map Tiles for Offline Use
-```bash
-python tile-downloader.py
-# or
-python3 tile-downloader.py
-```
+The tile downloader is now a compiled application (not Python) that:
+1. Downloads tiles based on ward boundaries or missing tile reports
+2. Generates tile manifest files (`osm-manifest.js`, `satellite-manifest.js`)
+3. Eliminates console errors by telling the app which tiles exist before loading
+
+**Tile Manifest System:**
+- Manifest files contain JavaScript constants listing all available tiles
+- Loaded as `<script>` tags to avoid CORS issues with `file://` protocol
+- Web app checks manifests before attempting to load tiles
+- No console errors for missing tiles - app skips directly to online fallback
 
 ### Testing the Application
 - Load CSV data with proper 11-column format
@@ -118,6 +124,35 @@ Resource fields accept multiple true representations: 'true', '1', 'yes', 'y'
 ### Multiple Households at Same Location
 The application handles apartments/shared addresses with a selection dialog in edit mode.
 
+### Tile Manifest System
+The application uses JavaScript manifest files to track tile availability:
+
+**Manifest Files:**
+- `tiles/osm-manifest.js` - Lists all available OSM street map tiles
+- `tiles/satellite-manifest.js` - Lists all available satellite imagery tiles
+
+**Format:**
+```javascript
+const osmManifest = {
+  "name": "OpenStreetMap Tiles",
+  "type": "osm",
+  "format": "z/x/y",
+  "tile_count": 1010,
+  "tiles": [
+    "10/281/398.png",
+    "11/562/796.png",
+    // ... more tiles
+  ],
+  "zoom_levels": [7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+};
+```
+
+**Benefits:**
+- **No console errors** - App knows which tiles exist before attempting to load
+- **CORS compatible** - Uses `<script>` tags instead of fetch() calls
+- **Performance** - Eliminates wasted requests for missing tiles
+- **Offline-first** - Works with file:// protocol without server
+
 ## Recent Updates & Bug Fixes
 
 ### UI Improvements
@@ -140,3 +175,5 @@ The application handles apartments/shared addresses with a selection dialog in e
 4. **Preserve localStorage data** - Don't clear without user action
 5. **Follow existing code patterns** - vanilla JavaScript, no frameworks
 6. **Resource discovery** - Always call updateDiscoveredResources() and buildResourceFilters() after data changes
+7. **Tile manifests** - External tile downloader app maintains manifest files; web app only reads them
+8. **No fetch() for local files** - Use JavaScript includes or avoid to prevent CORS issues

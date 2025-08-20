@@ -91,8 +91,9 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
       }
     } else {
       // Manifest not loaded yet, wait for it
-      // Capture coords in a const to ensure they're not lost in the async callback
-      const tileCoords = Object.assign({}, coords);
+      // Preserve coords for async callback
+      const tileCoords = coords;
+      
       this.loadTileManifest().then(() => {
         if (this.isTileAvailable(tileCoords)) {
           tile.src = this.getTileUrl(tileCoords);
@@ -116,8 +117,23 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
     
     // Try online if available
     if (this.mapManager && this.mapManager.isOnline) {
-      const tempLayer = L.tileLayer(this.onlineUrlTemplate, this.options);
-      tile.src = tempLayer.getTileUrl(coords);
+      // Ensure coords are in the format Leaflet expects for getTileUrl
+      console.log('Original coords:', coords, 'x:', coords.x, 'y:', coords.y, 'z:', coords.z);
+      const normalizedCoords = {
+        x: coords.x,
+        y: coords.y,
+        z: coords.z
+      };
+      // Manual URL generation since Leaflet's getTileUrl has issues
+      const subdomains = ['a', 'b', 'c'];
+      const subdomain = subdomains[Math.abs(coords.x + coords.y) % subdomains.length];
+      const onlineUrl = this.onlineUrlTemplate
+        .replace('{s}', subdomain)
+        .replace('{z}', coords.z)
+        .replace('{x}', coords.x)
+        .replace('{y}', coords.y);
+      console.log('Manual URL:', onlineUrl);
+      tile.src = onlineUrl;
       tile.hasTriedOnline = true;
       
       // Set up success handler to track online mode
@@ -156,8 +172,15 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
       tile.hasTriedOnline = true;
       
       // Try online source as fallback
-      const tempLayer = L.tileLayer(this.onlineUrlTemplate, this.options);
-      tile.src = tempLayer.getTileUrl(coords);
+      // Manual URL generation since Leaflet's getTileUrl has issues
+      const subdomains = ['a', 'b', 'c'];
+      const subdomain = subdomains[Math.abs(coords.x + coords.y) % subdomains.length];
+      const onlineUrl = this.onlineUrlTemplate
+        .replace('{s}', subdomain)
+        .replace('{z}', coords.z)
+        .replace('{x}', coords.x)
+        .replace('{y}', coords.y);
+      tile.src = onlineUrl;
       
       // Set up success handler to track online mode
       const originalOnLoad = tile.onload;
