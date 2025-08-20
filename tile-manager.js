@@ -84,24 +84,33 @@ class TileManager {
   }
   
   async validateTile(layerType, tileKey) {
+    // With manifest system, we check against the loaded manifests instead of using fetch
+    // This avoids CORS issues with file:// protocol
+    
     const [z, x, y] = tileKey.split('/').map(Number);
     
-    // Build the local tile path
-    let tilePath;
+    // Format the tile key based on layer type
+    let manifestKey;
     if (layerType === 'satellite') {
       // ArcGIS uses z/y/x format
-      tilePath = `tiles/satellite/${z}/${y}/${x}.png`;
+      manifestKey = `${z}/${y}/${x}.png`;
     } else {
       // OSM uses z/x/y format
-      tilePath = `tiles/osm/${z}/${x}/${y}.png`;
+      manifestKey = `${z}/${x}/${y}.png`;
     }
     
+    // Check if tile exists in the manifest
     try {
-      const response = await fetch(tilePath, { method: 'HEAD' });
-      return response.ok;
+      if (layerType === 'osm' && typeof osmManifest !== 'undefined') {
+        return osmManifest.tiles.includes(manifestKey);
+      } else if (layerType === 'satellite' && typeof satelliteManifest !== 'undefined') {
+        return satelliteManifest.tiles.includes(manifestKey);
+      }
     } catch (error) {
-      return false;
+      console.warn('Error checking tile in manifest:', error);
     }
+    
+    return false;
   }
   
   // Storage management
@@ -322,30 +331,16 @@ class TileManager {
       return this.tileCache.get(cacheKey);
     }
     
-    const [z, x, y] = tileKey.split('/').map(Number);
+    // With manifest system, we only track missing tiles, not preload
+    // Preloading with fetch causes CORS issues with file:// protocol
+    const isAvailable = await this.validateTile(layerType, tileKey);
     
-    let tilePath;
-    if (layerType === 'satellite') {
-      tilePath = `tiles/satellite/${z}/${y}/${x}.png`;
-    } else {
-      tilePath = `tiles/osm/${z}/${x}/${y}.png`;
-    }
-    
-    try {
-      const response = await fetch(tilePath);
-      if (response.ok) {
-        const blob = await response.blob();
-        this.tileCache.set(cacheKey, blob);
-        return blob;
-      } else {
-        // Track as missing
-        this.trackMissingTile(layerType, tileKey);
-        return null;
-      }
-    } catch (error) {
+    if (!isAvailable) {
+      // Track as missing
       this.trackMissingTile(layerType, tileKey);
-      return null;
     }
+    
+    return null;
   }
   
   // Periodic validation
@@ -361,6 +356,10 @@ class TileManager {
     if (totalBefore === 0) return;
     
     console.log(`Revalidating ${totalBefore} missing tiles...`);
+    
+    // Note: With manifest system, tiles are validated against the manifest
+    // The manifest is updated by the external tile downloader application
+    // User needs to refresh the page after downloading new tiles to load updated manifests
     
     const promises = [];
     
@@ -425,27 +424,24 @@ Missing Tiles Detected: ${report.total_missing}
 To download these tiles for offline use:
 
 1. Export the missing tiles report using the 'Export Missing Tiles' button
-2. Run the Python downloader with the report:
-   
-   python tile-downloader.py --missing-tiles missing-tiles-report.json
+2. Run the tile downloader application with the exported report
+3. The downloader will:
+   - Fetch the missing tiles
+   - Update the tile manifest files (osm-manifest.json, satellite-manifest.json)
+   - Save everything to the tiles directory
 
-3. The downloader will fetch only the missing tiles identified by the app
+After downloading:
+- Refresh this web page to load the updated manifests
+- The app will no longer show errors for the downloaded tiles
 
-Alternative: Full area download
-If you prefer to download all tiles for your ward area:
+The tile downloader application:
+- Downloads tiles with proper rate limiting
+- Maintains manifest files listing all available tiles
+- Supports resume capability for interrupted downloads
+- Creates proper directory structure automatically
 
-   python tile-downloader.py --csv ward_data.csv
-
-This will download tiles for the entire ward boundary with smart coverage
-around household locations.
-
-The downloader includes:
-- Rate limiting to be respectful to tile servers
-- Resume capability (skips already downloaded tiles)
-- Progress reporting
-- Automatic directory structure creation
-
-After downloading, refresh the web app to use the new offline tiles.
+Note: The manifest system eliminates console errors for missing tiles
+by checking tile availability before attempting to load them.
     `.trim();
     
     return instructions;

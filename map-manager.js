@@ -8,9 +8,64 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
     this.onlineMode = false;
     this.layerType = options.layerType || 'osm';
     this.mapManager = options.mapManager; // Reference to MapManager instance
+    
+    // Tile manifest system
+    this.tileManifest = null;
+    this.manifestLoaded = false;
+    this.manifestLoadPromise = null;
+    
     L.TileLayer.prototype.initialize.call(this, offlineUrlTemplate, options);
+    
+    // Load tile manifest
+    this.loadTileManifest();
   },
   
+  loadTileManifest: function() {
+    // Manifests are loaded as JavaScript variables from tiles/*-manifest.js files
+    try {
+      let manifest;
+      if (this.layerType === 'osm' && typeof osmManifest !== 'undefined') {
+        manifest = osmManifest;
+      } else if (this.layerType === 'satellite' && typeof satelliteManifest !== 'undefined') {
+        manifest = satelliteManifest;
+      }
+      
+      if (manifest) {
+        this.tileManifest = new Set(manifest.tiles);
+        this.manifestLoaded = true;
+        console.log(`Loaded ${this.layerType} tile manifest: ${manifest.tiles.length} tiles`);
+        return Promise.resolve(manifest);
+      } else {
+        console.warn(`${this.layerType} manifest not found`);
+        this.manifestLoaded = true;
+        this.tileManifest = new Set();
+        return Promise.resolve(null);
+      }
+    } catch (error) {
+      console.warn(`Error loading ${this.layerType} manifest:`, error);
+      this.manifestLoaded = true;
+      this.tileManifest = new Set();
+      return Promise.resolve(null);
+    }
+  },
+
+  isTileAvailable: function(coords) {
+    if (!this.manifestLoaded || !this.tileManifest) {
+      return false; // Assume not available if manifest not loaded
+    }
+    
+    // Format tile key based on layer type
+    // OSM uses z/x/y format, satellite (ArcGIS) uses z/y/x format
+    let tileKey;
+    if (this.layerType === 'satellite') {
+      tileKey = `${coords.z}/${coords.y}/${coords.x}.png`;
+    } else {
+      tileKey = `${coords.z}/${coords.x}/${coords.y}.png`;
+    }
+    
+    return this.tileManifest.has(tileKey);
+  },
+
   createTile: function(coords, done) {
     const tile = document.createElement('img');
     
@@ -25,39 +80,82 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
     tile.setAttribute('role', 'presentation');
     tile.setAttribute('data-coords', JSON.stringify(coords));
     
-    // Try offline first
-    tile.src = this.getTileUrl(coords);
+    // Check manifest to determine tile availability
+    if (this.manifestLoaded) {
+      if (this.isTileAvailable(coords)) {
+        // Tile is available offline, load it directly
+        tile.src = this.getTileUrl(coords);
+      } else {
+        // Tile not in manifest, skip to online or track as missing
+        this._handleMissingTile(tile, coords, done);
+      }
+    } else {
+      // Manifest not loaded yet, wait for it
+      // Capture coords in a const to ensure they're not lost in the async callback
+      const tileCoords = Object.assign({}, coords);
+      this.loadTileManifest().then(() => {
+        if (this.isTileAvailable(tileCoords)) {
+          tile.src = this.getTileUrl(tileCoords);
+        } else {
+          this._handleMissingTile(tile, tileCoords, done);
+        }
+      });
+    }
     
     return tile;
   },
+
+  _handleMissingTile: function(tile, coords, done) {
+    const tileKey = `${coords.z}/${coords.x}/${coords.y}`;
+    
+    // Track missing offline tile
+    if (this.mapManager && window.tileManager) {
+      window.tileManager.trackMissingTile(this.layerType, tileKey);
+      this.mapManager.updateConnectivityIndicator();
+    }
+    
+    // Try online if available
+    if (this.mapManager && this.mapManager.isOnline) {
+      const tempLayer = L.tileLayer(this.onlineUrlTemplate, this.options);
+      tile.src = tempLayer.getTileUrl(coords);
+      tile.hasTriedOnline = true;
+      
+      // Set up success handler to track online mode
+      const originalOnLoad = tile.onload;
+      tile.onload = () => {
+        if (!this.onlineMode) {
+          this.onlineMode = true;
+          this._updateAttribution();
+        }
+        if (originalOnLoad) originalOnLoad.call(tile);
+        done(null, tile);
+      };
+    } else {
+      // No online fallback available, show placeholder or fail gracefully
+      done(new Error('Tile not available offline'), tile);
+    }
+  },
   
   _tileOnError: function(done, tile, e) {
+    // With manifest system, this should rarely be called since we check availability first
+    // This handles edge cases like corrupted files that exist in manifest but fail to load
+    
     const coordsStr = tile.getAttribute('data-coords');
     let coords = {};
     
     if (coordsStr) {
       try {
         coords = JSON.parse(coordsStr);
-      } catch (e) {
+      } catch (parseError) {
         console.warn('Failed to parse tile coords:', coordsStr);
       }
     }
     
-    // Track missing offline tile
-    if (!tile.hasTriedOnline && coords.z !== undefined && coords.x !== undefined && coords.y !== undefined) {
-      const tileKey = `${coords.z}/${coords.x}/${coords.y}`;
-      if (this.mapManager) {
-        // TileManager handles all missing tile tracking
-        window.tileManager.trackMissingTile(this.layerType, tileKey);
-        this.mapManager.updateConnectivityIndicator();
-      }
-    }
-    
-    // If offline tile failed and we haven't tried online yet
+    // Try to fall back to online if available
     if (!tile.hasTriedOnline && this.mapManager && this.mapManager.isOnline) {
       tile.hasTriedOnline = true;
       
-      // Try online source
+      // Try online source as fallback
       const tempLayer = L.tileLayer(this.onlineUrlTemplate, this.options);
       tile.src = tempLayer.getTileUrl(coords);
       
@@ -84,11 +182,14 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
       return; // Don't call done yet, wait for online attempt
     }
     
-    // Both attempts failed or no internet, use error tile
+    // All attempts failed, use error tile
     tile.src = this.options.errorTileUrl;
     done(null, tile);
   },
   
+  // Note: Manifest files are maintained by the external tile downloader application
+  // The web app only reads these manifests to determine tile availability
+
   _updateAttribution: function() {
     if (this._map && this._map.attributionControl) {
       const attribution = this.onlineMode ? 
