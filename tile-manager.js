@@ -475,5 +475,4 @@ by checking tile availability before attempting to load them.
   }
 }
 
-// TileManager will be created by AppBootstrap to ensure proper initialization order
 

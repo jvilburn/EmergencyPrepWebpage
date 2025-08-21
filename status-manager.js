@@ -90,5 +90,4 @@ class StatusManager {
   }
 }
 
-// Create global instance
 window.statusManager = new StatusManager();

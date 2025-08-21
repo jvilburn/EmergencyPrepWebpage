@@ -411,4 +411,3 @@ class ResourceFilters {
   }
 }
 
-// ResourceFilters will be created by AppBootstrap

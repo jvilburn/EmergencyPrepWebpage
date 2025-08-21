@@ -1,42 +1,7 @@
 // app.js - Main application initialization and control
 
 // Global application state
-let editMode = false;
 let selectedHousehold = null;
-
-// Application initialization is now handled by AppBootstrap
-
-// File handling is now managed by FileManager class
-
-// Toggle edit mode
-function toggleEditMode() {
-  editMode = !editMode;
-  window.editMode = editMode; // Expose to global scope
-  
-  const toggle = document.getElementById('editToggle');
-  const indicator = document.getElementById('editIndicator');
-  
-  if (editMode) {
-    toggle.classList.add('active');
-    indicator.classList.add('active');
-    window.map.getContainer().style.cursor = 'pointer';
-  } else {
-    toggle.classList.remove('active');
-    indicator.classList.remove('active');
-    window.map.getContainer().style.cursor = '';
-  }
-  
-  // Update all marker popups to show/hide edit instructions
-  const households = window.stateManager.getAllHouseholds();
-  households.forEach(household => {
-    const marker = window.stateManager.getMapMarker(household.id);
-    if (marker) {
-      window.mapManager.updateMarkerPopup(household, marker);
-    }
-  });
-  
-  clearHighlights();
-}
 
 // Open household edit dialog
 function openHouseholdEditDialog(household) {
@@ -174,7 +139,6 @@ function updateClusterOptions() {
   }
 }
 
-// Make updateClusterOptions globally available
 window.updateClusterOptions = updateClusterOptions;
 
 // Confirm household edits
@@ -357,24 +321,11 @@ async function loadSavedData() {
 // Export loadSavedData for AppBootstrap
 window.loadSavedData = loadSavedData;
 
-// Expose global functions and state
-window.editMode = editMode;
-window.selectedHousehold = selectedHousehold;
-window.toggleEditMode = toggleEditMode;
 window.openHouseholdEditDialog = openHouseholdEditDialog;
 window.confirmHouseholdEdit = confirmHouseholdEdit;
 window.closeHouseholdEditDialog = closeHouseholdEditDialog;
 window.showHouseholdSelectionDialog = showHouseholdSelectionDialog;
 window.selectHouseholdForEdit = selectHouseholdForEdit;
-
-// File operations are now handled by FileManager class
-
-// Clear highlights function
-function clearHighlights() {
-  window.highlightingManager.clearHighlights();
-}
-
-// HTML events are now handled by EventManager
 
 // Function to set household edit functions on EventManager (called by AppBootstrap)
 window.setupHouseholdEditFunctions = function() {

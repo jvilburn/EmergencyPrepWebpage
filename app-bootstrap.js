@@ -56,6 +56,7 @@ class AppBootstrap {
     window.householdList = new HouseholdList(window.stateManager);
     window.resourceFilters = new ResourceFilters(window.stateManager);
     window.highlightingManager = new HighlightingManager(window.stateManager);
+    window.changeNotification = new ChangeNotification(window.stateManager);
     
     // Create UIManager (depends on other UI components)
     window.uiManager = new UIManager(window.stateManager);
@@ -134,7 +135,6 @@ class AppBootstrap {
   }
 }
 
-// Global bootstrap function
 window.initializeApp = async function() {
   const bootstrap = new AppBootstrap();
   try {

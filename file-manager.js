@@ -216,6 +216,9 @@ class FileManager {
       // Create and download file
       this.downloadFile(csvData, filename, 'text/csv');
       
+      // Notify that file was saved
+      this.state.notify('file:saved', { filename, type: 'csv' });
+      
       // Log export statistics
       const stats = this.state.getStats();
       console.log(`FileManager: Exported ${stats.total} households to ${filename}`);
@@ -289,6 +292,9 @@ class FileManager {
       }
       
       this.downloadFile(csvData, exportFilename, 'text/csv');
+      
+      // Notify that file was saved
+      this.state.notify('file:saved', { filename: exportFilename, type: 'csv' });
       
       const exportType = includeModifiedOnly ? 'modified' : 'all';
       this.status.success(`Exported ${exportType} household data to ${exportFilename}`);
@@ -372,5 +378,4 @@ class FileManager {
   }
 }
 
-// FileManager will be created by AppBootstrap to ensure proper initialization order
 

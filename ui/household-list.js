@@ -349,4 +349,3 @@ class HouseholdList {
   }
 }
 
-// HouseholdList will be created by AppBootstrap

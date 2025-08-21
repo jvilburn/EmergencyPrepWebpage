@@ -62,5 +62,4 @@ class Household {
   }
 }
 
-// Export for use in modules
 window.Household = Household;

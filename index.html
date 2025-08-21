@@ -77,6 +77,11 @@
   <!-- Map Container -->
   <div id="map"></div>
   
+  <!-- Change Notification -->
+  <div id="changeNotification" class="change-notification hidden">
+    <span id="changeCount">0 Records Changed</span>
+  </div>
+  
   
   <!-- Hidden File Input -->
   <input type="file" id="fileInput" accept=".csv" style="display: none;">
@@ -131,6 +136,7 @@
   <script src="ui/resource-filters.js"></script>
   <script src="ui/highlighting.js"></script>
   <script src="ui/ui-manager.js"></script>
+  <script src="change-notification.js"></script>
   
   <!-- Additional modules -->
   <script src="region-cluster-manager-class.js"></script>

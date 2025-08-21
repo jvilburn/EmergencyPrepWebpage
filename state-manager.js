@@ -11,8 +11,7 @@ class StateManager {
         highlightedItems: new Set(),
         activeFilters: new Map(),
         sortMode: 'name',
-        sidebarCollapsed: false,
-        editMode: false
+        sidebarCollapsed: false
       },
       map: {
         markers: new Map(),

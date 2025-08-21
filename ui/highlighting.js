@@ -362,4 +362,3 @@ class HighlightingManager {
   }
 }
 
-// HighlightingManager will be created by AppBootstrap

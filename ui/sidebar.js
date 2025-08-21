@@ -254,5 +254,4 @@ class Sidebar {
   }
 }
 
-// Sidebar will be created by AppBootstrap
 
