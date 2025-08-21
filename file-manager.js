@@ -192,7 +192,7 @@ class FileManager {
   }
   
   // CSV Export functionality
-  exportToCSV(filename = null) {
+  async exportToCSV(filename = null) {
     try {
       // Generate CSV data
       const csvData = this.dataLayer.exportToCSV();
@@ -213,7 +213,29 @@ class FileManager {
         filename += '.csv';
       }
       
-      // Create and download file
+      // Use Electron native save dialog if available
+      if (window.isElectron && window.electronAPI) {
+        try {
+          const result = await window.electronAPI.saveCSVFile(csvData, filename);
+          if (result) {
+            // Notify that file was saved
+            this.state.notify('file:saved', { filename: result.name, type: 'csv', path: result.path });
+            
+            // Log export statistics
+            const stats = this.state.getStats();
+            console.log(`FileManager: Exported ${stats.total} households to ${result.name}`);
+            this.status.success(`Exported ${stats.total} households to ${result.name}`);
+            
+            return true;
+          }
+          return false;
+        } catch (error) {
+          console.error('Electron save error:', error);
+          // Fall back to browser download
+        }
+      }
+      
+      // Fallback to browser download
       this.downloadFile(csvData, filename, 'text/csv');
       
       // Notify that file was saved
@@ -255,11 +277,56 @@ class FileManager {
   }
   
   // Trigger file selection dialog
-  triggerFileLoad() {
+  async triggerFileLoad() {
+    // Use Electron native dialog if available
+    if (window.isElectron && window.electronAPI) {
+      try {
+        const fileData = await window.electronAPI.selectCSVFile();
+        if (fileData) {
+          return await this.loadFileFromElectron(fileData);
+        }
+        return null;
+      } catch (error) {
+        console.error('Electron file selection error:', error);
+        this.status.error('Failed to open file dialog');
+        return null;
+      }
+    }
+    
+    // Fallback to web file input
     if (this.fileInput) {
       this.fileInput.click();
     } else {
       this.status.error('File input not available');
+    }
+  }
+
+  // Load file from Electron native dialog
+  async loadFileFromElectron(fileData) {
+    this.status.info(`Loading ${fileData.name}...`);
+
+    try {
+      // Import data directly from content
+      const result = await this.dataLayer.importFromCSV(fileData.content);
+
+      console.log(`FileManager: Imported ${result.imported} households`);
+
+      // Update map and UI
+      await this.updateUIAfterLoad(result);
+
+      // Show success message
+      const stats = this.state.getStats();
+      this.status.success(`Loaded ${result.imported} households in ${stats.totalRegions} regions from ${fileData.name}`);
+
+      // Notify other components
+      this.state.notify('households:loaded', result.households);
+
+      return result;
+
+    } catch (error) {
+      console.error('FileManager: Electron file load error:', error);
+      this.status.error(`Failed to load ${fileData.name}: ${error.message}`);
+      return null;
     }
   }
   
