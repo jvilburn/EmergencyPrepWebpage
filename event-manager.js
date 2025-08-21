@@ -19,7 +19,6 @@ class EventManager {
   
   init() {
     this.setupHamburgerMenu();
-    this.setupSidebar();
     this.setupFileOperations();
     this.setupViewOperations();
     this.setupEditOperations();
@@ -51,12 +50,6 @@ class EventManager {
     }
   }
   
-  setupSidebar() {
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
-    if (sidebarToggle) {
-      sidebarToggle.addEventListener('click', () => this.sidebar.toggle());
-    }
-  }
   
   setupFileOperations() {
     this.addMenuButtonListener('Load CSV', () => {
@@ -145,15 +138,18 @@ class EventManager {
   }
   
   setupCollapsibleSections() {
-    const householdHeader = document.querySelector('.collapsible-header');
-    if (householdHeader && householdHeader.querySelector('span').textContent.includes('Household List')) {
-      householdHeader.addEventListener('click', () => this.toggleHouseholdList());
-    }
+    // Find headers by their content to handle any ordering
+    const allHeaders = document.querySelectorAll('.collapsible-header');
     
-    const resourceHeader = document.querySelectorAll('.collapsible-header')[1];
-    if (resourceHeader && resourceHeader.querySelector('span').textContent.includes('Resource Filters')) {
-      resourceHeader.addEventListener('click', () => this.toggleResourceFilters());
-    }
+    allHeaders.forEach(header => {
+      const headerText = header.querySelector('span').textContent;
+      
+      if (headerText.includes('Household List')) {
+        header.addEventListener('click', () => this.toggleHouseholdList());
+      } else if (headerText.includes('Resource Filters')) {
+        header.addEventListener('click', () => this.toggleResourceFilters());
+      }
+    });
   }
   
   setupModalDialogs() {

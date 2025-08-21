@@ -345,8 +345,6 @@ async function loadSavedData() {
   try {
     const savedData = await window.dataLayer.loadFromLocalStorage();
     if (savedData && savedData.households.length > 0) {
-      console.log(`Loaded ${savedData.households.length} households from localStorage`);
-      window.statusManager.success(`Loaded ${savedData.households.length} households from localStorage`);
       window.mapManager.createMapMarkers();
       window.mapManager.updateBoundaries();
     }
@@ -386,7 +384,6 @@ window.setupHouseholdEditFunctions = function() {
       window.closeHouseholdEditDialog,
       window.confirmHouseholdEdit
     );
-    console.log('✓ Household edit functions set on EventManager');
     return true;
   }
   return false;

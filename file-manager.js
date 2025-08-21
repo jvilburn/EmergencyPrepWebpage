@@ -144,7 +144,6 @@ class FileManager {
       this.status.success(`Loaded ${result.imported} households in ${stats.totalRegions} regions from ${file.name}`);
       
       // Notify other components
-      console.log('FileManager: Notifying households:loaded event');
       this.state.notify('households:loaded', result.households);
       
       return result;

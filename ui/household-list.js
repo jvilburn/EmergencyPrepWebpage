@@ -16,7 +16,6 @@ class HouseholdList {
     
     // Listen to state changes
     this.state.subscribe('households:loaded', (households) => {
-      console.log('HouseholdList: households:loaded event received, count:', households?.length || 0);
       this.rebuild();
     });
     this.state.subscribe('household:added', () => this.rebuild());
@@ -29,7 +28,6 @@ class HouseholdList {
   }
   
   rebuild() {
-    console.log('HouseholdList: rebuild() called');
     if (!this.container) {
       console.error('HouseholdList: container not found');
       return;
@@ -38,26 +36,20 @@ class HouseholdList {
     this.container.innerHTML = '';
     
     const households = this.state.getAllHouseholds();
-    console.log('HouseholdList: Got', households.length, 'households from state');
     if (households.length === 0) {
       this.showEmptyState();
       return;
     }
     
     const sortMode = this.state.getSortMode();
-    console.log('HouseholdList: Sort mode is', sortMode);
     
     if (sortMode === 'name') {
-      console.log('HouseholdList: Building by name');
       this.buildByName();
     } else {
-      console.log('HouseholdList: Building by region');
       this.buildByRegion();
     }
     
-    console.log('HouseholdList: Applying filters');
     this.applyFilters();
-    console.log('HouseholdList: rebuild() complete');
   }
   
   showEmptyState() {
@@ -72,15 +64,12 @@ class HouseholdList {
     const households = this.state.getAllHouseholds().sort((a, b) => 
       a.name.localeCompare(b.name)
     );
-    console.log('HouseholdList: buildByName creating', households.length, 'items');
     
     households.forEach((household, index) => {
       const listItem = this.createHouseholdItem(household);
       this.container.appendChild(listItem);
-      if (index < 3) console.log('HouseholdList: Added item for', household.name);
     });
     
-    console.log('HouseholdList: buildByName complete, container has', this.container.children.length, 'children');
   }
   
   buildByRegion() {
@@ -142,7 +131,7 @@ class HouseholdList {
     li.className = `household-item ${extraClasses}`;
     
     if (household.isIsolated()) li.classList.add('isolated');
-    if (this.isModified(household)) li.classList.add('modified');
+    if (household.isModified()) li.classList.add('modified');
     
     li.dataset.householdId = household.id;
     li.dataset.name = household.name;
@@ -318,7 +307,7 @@ class HouseholdList {
     }
     
     // Apply filters
-    const filteredHouseholds = window.dataLayer.filterByResources(new Map(Object.entries(activeFilters)));
+    const filteredHouseholds = window.dataLayer.filterByResources(activeFilters);
     const matchingIds = new Set(filteredHouseholds.map(h => h.id));
     
     // Update household items
@@ -336,10 +325,6 @@ class HouseholdList {
   }
   
   // Helper methods
-  isModified(household) {
-    return household.originalRegionId !== household.regionId || 
-           household.originalClusterId !== household.communicationsClusterId;
-  }
   
   scrollToHousehold(householdId) {
     const item = document.querySelector(`[data-household-id="${householdId}"]`);

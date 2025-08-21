@@ -9,7 +9,6 @@ class AppBootstrap {
     if (this.initialized) return;
     
     try {
-      console.log('🚀 Starting Ward Directory Map application...');
       
       // Phase 1: Core Foundation
       this.createFoundationLayer();
@@ -30,7 +29,6 @@ class AppBootstrap {
       await this.finalizeInitialization();
       
       this.initialized = true;
-      console.log('✅ Application initialization complete');
       
     } catch (error) {
       console.error('❌ Application initialization failed:', error);
@@ -43,7 +41,6 @@ class AppBootstrap {
     if (!window.stateManager || !window.statusManager) {
       throw new Error('Foundation layer not ready');
     }
-    console.log('✓ Foundation layer ready');
   }
   
   createDataLayer() {
@@ -51,7 +48,6 @@ class AppBootstrap {
     if (!window.dataLayer) {
       throw new Error('DataLayer not ready');
     }
-    console.log('✓ Data layer ready');
   }
   
   async createUIComponents() {
@@ -68,7 +64,6 @@ class AppBootstrap {
       throw new Error('UIManager creation failed');
     }
     
-    console.log('✓ UI components ready');
   }
   
   createMapManagers() {
@@ -85,7 +80,6 @@ class AppBootstrap {
       window.mapManager
     );
     
-    console.log('✓ Map and file managers ready');
   }
   
   createRegionManagement() {
@@ -99,7 +93,6 @@ class AppBootstrap {
       window.mapManager
     );
     
-    console.log('✓ Region management ready');
   }
   
   async finalizeInitialization() {
@@ -126,7 +119,6 @@ class AppBootstrap {
       window.setupHouseholdEditFunctions();
     }
     
-    console.log('✓ Application ready for use');
   }
   
   // Error recovery

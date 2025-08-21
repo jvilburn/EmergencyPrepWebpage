@@ -12,7 +12,7 @@
     <div class="sidebar-header">
       <button class="hamburger-menu" title="Menu">☰</button>
       <h3>📋 Households</h3>
-      <button class="sidebar-toggle" title="Collapse sidebar">◀</button>
+      <button class="sidebar-toggle" id="sidebarToggle" title="Collapse sidebar">◀</button>
     </div>
     
     <!-- Hamburger Menu -->
@@ -42,7 +42,20 @@
       </div>
     </div>
     <div class="sidebar-controls">
-      <input type="text" class="search-box" id="searchBox" placeholder="Search households..." onkeyup="filterHouseholds()">
+      <input type="text" class="search-box" id="searchInput" placeholder="Search households...">
+      
+      <!-- Collapsible Resource Filters -->
+      <div class="collapsible-section">
+        <div class="collapsible-header">
+          <span>🔧 Resource Filters</span>
+          <span class="expand-icon" id="resourceFiltersIcon">▶</span>
+        </div>
+        <div class="collapsible-content collapsed" id="resourceFiltersSection">
+          <div class="resource-filters-grid" id="dynamicFiltersGrid">
+            <div class="loading-filters">Load household data to see available filters</div>
+          </div>
+        </div>
+      </div>
       
       <!-- Collapsible Household List -->
       <div class="collapsible-section">
@@ -58,22 +71,6 @@
           <ul class="household-list" id="householdList"></ul>
         </div>
       </div>
-      
-      <!-- Collapsible Resource Filters -->
-      <div class="collapsible-section">
-        <div class="collapsible-header">
-          <span>🔧 Resource Filters</span>
-          <span class="expand-icon" id="resourceFiltersIcon">▶</span>
-        </div>
-        <div class="collapsible-content collapsed" id="resourceFiltersSection">
-          <div class="resource-filters-grid" id="dynamicFiltersGrid">
-            <div class="loading-filters">Load household data to see available filters</div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="sidebar-footer" id="sidebarFooter">
-      0 households loaded
     </div>
   </div>
   

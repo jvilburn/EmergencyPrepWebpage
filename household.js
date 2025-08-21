@@ -14,6 +14,9 @@ class Household {
     this.communicationSkillsAndEquipment = data.communicationSkillsAndEquipment?.trim() || '';
     this.communicationsRegionName = data.communicationsRegionName?.trim() || '';
     this.communicationsClusterId = data.communicationsClusterId ? parseInt(data.communicationsClusterId) : null;
+    // Original values for change tracking
+    this.originalCommunicationsRegionName = data.originalCommunicationsRegionName?.trim() || this.communicationsRegionName;
+    this.originalCommunicationsClusterId = data.originalCommunicationsClusterId ? parseInt(data.originalCommunicationsClusterId) : this.communicationsClusterId;
     this.created = data.created || Date.now();
     this.modified = data.modified || Date.now();
   }
@@ -46,6 +49,11 @@ class Household {
       created: this.created,
       modified: this.modified
     };
+  }
+
+  isModified() {
+    return this.originalCommunicationsRegionName !== this.communicationsRegionName || 
+           this.originalCommunicationsClusterId !== this.communicationsClusterId;
   }
   
   // Create Household instance from plain object

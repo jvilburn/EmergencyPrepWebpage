@@ -10,16 +10,6 @@ class Sidebar {
   init() {
     this.setupEventListeners();
     this.setupSearch();
-    this.updateFooter();
-    
-    // Listen to state changes
-    this.state.subscribe('households:loaded', () => {
-      console.log('Sidebar: households:loaded event received');
-      this.updateFooter();
-    });
-    this.state.subscribe('household:added', () => this.updateFooter());
-    this.state.subscribe('household:deleted', () => this.updateFooter());
-    this.state.subscribe('ui:filters:changed', () => this.updateFooter());
   }
   
   setupEventListeners() {
@@ -71,18 +61,15 @@ class Sidebar {
   
   toggle() {
     const sidebar = document.getElementById('sidebar');
-    const map = document.getElementById('map');
     
-    if (!sidebar || !map) return;
+    if (!sidebar) return;
     
     const isCollapsed = sidebar.classList.contains('collapsed');
     
     if (isCollapsed) {
       sidebar.classList.remove('collapsed');
-      map.classList.remove('sidebar-collapsed');
     } else {
       sidebar.classList.add('collapsed');
-      map.classList.add('sidebar-collapsed');
     }
     
     this.state.setSidebarCollapsed(!isCollapsed);
@@ -229,33 +216,6 @@ class Sidebar {
     group.style.display = visibleItems.length > 0 ? '' : 'none';
   }
   
-  updateSearchStats(query) {
-    const visibleItems = document.querySelectorAll('.household-item:not([style*="display: none"])');
-    const footer = document.getElementById('sidebarFooter');
-    
-    if (footer) {
-      const total = this.state.getAllHouseholds().length;
-      footer.textContent = `${visibleItems.length} of ${total} households match "${query}"`;
-    }
-  }
-  
-  updateFooter() {
-    const footer = document.getElementById('sidebarFooter');
-    if (!footer) return;
-    
-    const stats = this.state.state.stats || this.calculateStats();
-    const activeFilters = this.state.getActiveFilters();
-    const hasFilters = Object.keys(activeFilters).length > 0;
-    
-    if (hasFilters) {
-      // Show filter results
-      const filteredHouseholds = window.dataLayer.filterByResources(new Map(Object.entries(activeFilters)));
-      footer.textContent = `${filteredHouseholds.length} of ${stats.total} households match filters`;
-    } else {
-      // Show general stats
-      footer.textContent = `${stats.total} households loaded`;
-    }
-  }
   
   calculateStats() {
     const households = this.state.getAllHouseholds();
@@ -269,22 +229,18 @@ class Sidebar {
   // Public methods for external use
   collapse() {
     const sidebar = document.getElementById('sidebar');
-    const map = document.getElementById('map');
     
-    if (sidebar && map) {
+    if (sidebar) {
       sidebar.classList.add('collapsed');
-      map.classList.add('sidebar-collapsed');
       this.state.setSidebarCollapsed(true);
     }
   }
   
   expand() {
     const sidebar = document.getElementById('sidebar');
-    const map = document.getElementById('map');
     
-    if (sidebar && map) {
+    if (sidebar) {
       sidebar.classList.remove('collapsed');
-      map.classList.remove('sidebar-collapsed');
       this.state.setSidebarCollapsed(false);
     }
   }

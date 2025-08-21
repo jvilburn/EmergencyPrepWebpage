@@ -32,11 +32,11 @@ class UIManager {
     
     // Coordinate between resource filters and other modules
     this.state.subscribe('ui:filters:applied', (filters) => {
-      this.modules.sidebar.updateFooter();
+      // Filters are handled by resource-filters module
     });
     
     this.state.subscribe('ui:filters:cleared', () => {
-      this.modules.sidebar.updateFooter();
+      // Filters are handled by resource-filters module
     });
     
     // Coordinate highlighting across modules
@@ -120,7 +120,6 @@ class UIManager {
   
   onHouseholdsLoaded(households) {
     // Coordinate response to data loading
-    console.log(`UIManager: Loaded ${households.length} households`);
     
     // Refresh all modules
     this.refreshAllModules();
@@ -128,8 +127,6 @@ class UIManager {
     // Clear any existing highlights (UI only during loading)
     this.modules.highlighting.clearHighlightsUI();
     
-    // Update footer
-    this.modules.sidebar.updateFooter();
     
     // Show loaded state
     this.showLoadedState();
@@ -147,7 +144,6 @@ class UIManager {
     
     // Refresh modules that depend on household data
     this.modules.resourceFilters.refresh();
-    this.modules.sidebar.updateFooter();
   }
   
   refreshAllModules() {

@@ -146,7 +146,6 @@ class TileManager {
           };
         }
         
-        console.log(`Loaded ${this.getTotalMissingCount()} missing tiles from storage`);
         this.updateMissingTilesUI();
       }
     } catch (error) {
@@ -163,7 +162,6 @@ class TileManager {
     };
     
     localStorage.removeItem('ward-map-missing-tiles');
-    console.log('Missing tiles tracking cleared');
     this.updateMissingTilesUI();
   }
   
@@ -355,7 +353,6 @@ class TileManager {
     const totalBefore = this.getTotalMissingCount();
     if (totalBefore === 0) return;
     
-    console.log(`Revalidating ${totalBefore} missing tiles...`);
     
     // Note: With manifest system, tiles are validated against the manifest
     // The manifest is updated by the external tile downloader application
@@ -379,7 +376,6 @@ class TileManager {
     const found = totalBefore - totalAfter;
     
     if (found > 0) {
-      console.log(`Revalidation complete: ${found} tiles are now available offline`);
       this.status.success(`Found ${found} new offline tiles`);
     }
   }

@@ -39,12 +39,12 @@ class ResourceFilters {
     // Get discovered resources (already updated by state manager)
     const resources = this.state.getDiscoveredResources();
     
+    this.buildClearButton();
     this.buildSpecialNeedsFilter();
     this.buildMedicalSkillsFilters(resources.medicalSkills);
+    this.buildCommunicationFilters(resources.communicationSkillsAndEquipment);
     this.buildRecoverySkillsFilters(resources.recoverySkills);
     this.buildRecoveryEquipmentFilters(resources.recoveryEquipment);
-    this.buildCommunicationFilters(resources.communicationSkillsAndEquipment);
-    this.buildClearButton();
   }
   
   showEmptyState() {
@@ -60,11 +60,7 @@ class ResourceFilters {
     
     if (!hasSpecialNeeds) return;
     
-    const header = document.createElement('h5');
-    header.textContent = 'Special Needs';
-    header.style.gridColumn = 'span 2';
-    header.style.marginBottom = '10px';
-    this.container.appendChild(header);
+    const section = this.createCollapsibleSection('Special Needs', 'special-needs');
     
     const label = this.createFilterItem({
       type: 'specialNeeds',
@@ -72,17 +68,14 @@ class ResourceFilters {
       displayName: 'Has Special Needs'
     });
     
-    this.container.appendChild(label);
+    section.content.appendChild(label);
+    this.container.appendChild(section.wrapper);
   }
   
   buildMedicalSkillsFilters(medicalSkills) {
     if (!medicalSkills || medicalSkills.size === 0) return;
     
-    const header = document.createElement('h5');
-    header.textContent = 'Medical Skills';
-    header.style.gridColumn = 'span 2';
-    header.style.marginBottom = '10px';
-    this.container.appendChild(header);
+    const section = this.createCollapsibleSection('Medical Skills', 'medical-skills');
     
     Array.from(medicalSkills).sort().forEach(skill => {
       const label = this.createFilterItem({
@@ -91,18 +84,16 @@ class ResourceFilters {
         displayName: this.capitalizeFirst(skill)
       });
       
-      this.container.appendChild(label);
+      section.content.appendChild(label);
     });
+    
+    this.container.appendChild(section.wrapper);
   }
   
   buildRecoverySkillsFilters(recoverySkills) {
     if (!recoverySkills || recoverySkills.size === 0) return;
     
-    const header = document.createElement('h5');
-    header.textContent = 'Recovery Skills';
-    header.style.gridColumn = 'span 2';
-    header.style.marginBottom = '10px';
-    this.container.appendChild(header);
+    const section = this.createCollapsibleSection('Recovery Skills', 'recovery-skills');
     
     Array.from(recoverySkills).sort().forEach(skill => {
       const label = this.createFilterItem({
@@ -111,18 +102,16 @@ class ResourceFilters {
         displayName: this.capitalizeFirst(skill)
       });
       
-      this.container.appendChild(label);
+      section.content.appendChild(label);
     });
+    
+    this.container.appendChild(section.wrapper);
   }
   
   buildRecoveryEquipmentFilters(recoveryEquipment) {
     if (!recoveryEquipment || recoveryEquipment.size === 0) return;
     
-    const header = document.createElement('h5');
-    header.textContent = 'Recovery Equipment';
-    header.style.gridColumn = 'span 2';
-    header.style.marginBottom = '10px';
-    this.container.appendChild(header);
+    const section = this.createCollapsibleSection('Recovery Equipment', 'recovery-equipment');
     
     Array.from(recoveryEquipment).sort().forEach(equipment => {
       const label = this.createFilterItem({
@@ -131,18 +120,16 @@ class ResourceFilters {
         displayName: this.capitalizeFirst(equipment)
       });
       
-      this.container.appendChild(label);
+      section.content.appendChild(label);
     });
+    
+    this.container.appendChild(section.wrapper);
   }
   
   buildCommunicationFilters(communicationSkillsAndEquipment) {
     if (!communicationSkillsAndEquipment || communicationSkillsAndEquipment.size === 0) return;
     
-    const header = document.createElement('h5');
-    header.textContent = 'Communication Skills & Equipment';
-    header.style.gridColumn = 'span 2';
-    header.style.marginBottom = '10px';
-    this.container.appendChild(header);
+    const section = this.createCollapsibleSection('Communication Skills & Equipment', 'communication-skills');
     
     Array.from(communicationSkillsAndEquipment).sort().forEach(item => {
       const label = this.createFilterItem({
@@ -151,8 +138,10 @@ class ResourceFilters {
         displayName: this.capitalizeFirst(item)
       });
       
-      this.container.appendChild(label);
+      section.content.appendChild(label);
     });
+    
+    this.container.appendChild(section.wrapper);
   }
   
   buildClearButton() {
@@ -166,9 +155,66 @@ class ResourceFilters {
     this.container.appendChild(clearBtn);
   }
   
+  createCollapsibleSection(title, id) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'resource-filter-section';
+    wrapper.style.gridColumn = 'span 2';
+    wrapper.style.marginBottom = '6px';
+    
+    const header = document.createElement('div');
+    header.className = 'resource-filter-header';
+    header.style.cursor = 'pointer';
+    header.style.display = 'flex';
+    header.style.justifyContent = 'space-between';
+    header.style.alignItems = 'center';
+    header.style.padding = '4px 0';
+    header.style.borderBottom = '1px solid #dee2e6';
+    header.style.marginBottom = '4px';
+    
+    const titleSpan = document.createElement('span');
+    titleSpan.style.fontWeight = 'bold';
+    titleSpan.style.fontSize = '14px';
+    titleSpan.textContent = title;
+    
+    const icon = document.createElement('span');
+    icon.className = 'expand-icon';
+    icon.textContent = '▶';
+    icon.style.fontSize = '12px';
+    icon.style.color = '#6c757d';
+    
+    header.appendChild(titleSpan);
+    header.appendChild(icon);
+    
+    const content = document.createElement('div');
+    content.className = 'resource-filter-content collapsed';
+    content.style.display = 'none';
+    content.id = `${id}-content`;
+    
+    // Add toggle handler
+    header.addEventListener('click', () => {
+      const isCollapsed = content.classList.contains('collapsed');
+      if (isCollapsed) {
+        content.classList.remove('collapsed');
+        content.style.display = 'block';
+        icon.textContent = '▼';
+      } else {
+        content.classList.add('collapsed');
+        content.style.display = 'none';
+        icon.textContent = '▶';
+      }
+    });
+    
+    wrapper.appendChild(header);
+    wrapper.appendChild(content);
+    
+    return { wrapper, header, content, icon };
+  }
+
   createFilterItem({ type, field, displayName }) {
     const label = document.createElement('label');
     label.className = 'resource-filter-item';
+    label.style.display = 'block';
+    label.style.marginBottom = '3px';
     
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
@@ -178,6 +224,7 @@ class ResourceFilters {
     
     const span = document.createElement('span');
     span.textContent = displayName;
+    span.style.marginLeft = '8px';
     
     label.appendChild(checkbox);
     label.appendChild(span);
@@ -212,17 +259,13 @@ class ResourceFilters {
   }
   
   updateVisualEffects(activeFilters) {
-    const filterMap = new Map(
-      Object.entries(activeFilters).map(([key, value]) => [value.type, value.field])
-    );
-    
-    if (filterMap.size === 0) {
+    if (Object.keys(activeFilters).length === 0) {
       this.clearVisualEffects();
       return;
     }
     
-    // Filter households
-    const filteredHouseholds = window.dataLayer.filterByResources(filterMap);
+    // Filter households - pass activeFilters object directly
+    const filteredHouseholds = window.dataLayer.filterByResources(activeFilters);
     const matchingIds = new Set(filteredHouseholds.map(h => h.id));
     
     // Update map markers
@@ -346,11 +389,7 @@ class ResourceFilters {
       return this.state.getAllHouseholds();
     }
     
-    const filterMap = new Map(
-      Object.entries(activeFilters).map(([key, value]) => [value.type, value.field])
-    );
-    
-    return window.dataLayer.filterByResources(filterMap);
+    return window.dataLayer.filterByResources(activeFilters);
   }
   
   setFilters(filters) {

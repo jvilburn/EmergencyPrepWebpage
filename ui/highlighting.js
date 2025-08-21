@@ -103,8 +103,17 @@ class HighlightingManager {
   
   // Clear only UI elements (internal method - no state clearing)
   clearHighlightsUI() {
-    // Restore all map markers
-    this.restoreAllMapMarkers();
+    // Check if resource filters are active before restoring markers
+    const activeFilters = this.state.getActiveFilters();
+    const hasResourceFilters = Object.keys(activeFilters).length > 0;
+    
+    if (hasResourceFilters) {
+      // Only restore markers that aren't affected by resource filters
+      this.restoreMarkersPreservingResourceFilters();
+    } else {
+      // Restore all map markers normally
+      this.restoreAllMapMarkers();
+    }
     
     // Restore sidebar items
     this.restoreSidebarItems();
@@ -181,6 +190,25 @@ class HighlightingManager {
         }
       }
     });
+  }
+
+  restoreMarkersPreservingResourceFilters() {
+    // When resource filters are active, let the resource filter system handle marker styling
+    // Just clean up any _originalStyles and trigger resource filter reapplication
+    const allMarkers = this.state.getAllMapMarkers();
+    
+    allMarkers.forEach((marker, householdId) => {
+      if (marker && marker._originalStyles) {
+        // Clean up original styles but don't restore them
+        delete marker._originalStyles;
+      }
+    });
+    
+    // Trigger resource filter system to reapply its styling
+    if (window.resourceFilters) {
+      const activeFilters = this.state.getActiveFilters();
+      window.resourceFilters.updateVisualEffects(activeFilters);
+    }
   }
   
   // Sidebar operations

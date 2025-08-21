@@ -270,8 +270,12 @@ class DataLayer {
       // Update discovered resources
       this.state.updateDiscoveredResources();
       
+      // Notify that households have been loaded
+      const households = this.state.getAllHouseholds();
+      this.state.notify('households:loaded', households);
+      
       return {
-        households: this.state.getAllHouseholds(),
+        households: households,
         regions: this.state.getAllRegions(),
         savedAt: parsed.savedAt
       };
@@ -288,33 +292,46 @@ class DataLayer {
   }
   
   // Resource filtering
-  filterByResources(filters) {
-    if (!filters || filters.size === 0) {
+  filterByResources(activeFilters) {
+    if (!activeFilters || Object.keys(activeFilters).length === 0) {
       return this.getAllHouseholds();
     }
     
+    // Group filters by type
+    const filtersByType = {};
+    Object.values(activeFilters).forEach(filter => {
+      if (!filtersByType[filter.type]) {
+        filtersByType[filter.type] = [];
+      }
+      filtersByType[filter.type].push(filter.field);
+    });
+    
     return this.getAllHouseholds().filter(household => {
-      return Array.from(filters.entries()).every(([type, field]) => {
-        switch (type) {
-          case 'specialNeeds':
-            return field === 'hasSpecialNeeds' ? 
-              (household.specialNeeds && household.specialNeeds.trim()) : false;
-            
-          case 'medicalSkill':
-            return household.medicalSkills?.toLowerCase().includes(field.toLowerCase());
-            
-          case 'recoverySkill':
-            return household.recoverySkills?.toLowerCase().includes(field.toLowerCase());
-            
-          case 'recoveryEquipment':
-            return household.recoveryEquipment?.toLowerCase().includes(field.toLowerCase());
-            
-          case 'communicationSkillsAndEquipment':
-            return household.communicationSkillsAndEquipment?.toLowerCase().includes(field.toLowerCase());
-            
-          default:
-            return false;
-        }
+      // All filter types must match (AND across types)
+      return Object.entries(filtersByType).every(([type, fields]) => {
+        // Any field within a type must match (OR within type)
+        return fields.some(field => {
+          switch (type) {
+            case 'specialNeeds':
+              return field === 'hasSpecialNeeds' ? 
+                (household.specialNeeds && household.specialNeeds.trim()) : false;
+              
+            case 'medicalSkill':
+              return this.hasExactResourceMatch(household.medicalSkills, field);
+              
+            case 'recoverySkill':
+              return this.hasExactResourceMatch(household.recoverySkills, field);
+              
+            case 'recoveryEquipment':
+              return this.hasExactResourceMatch(household.recoveryEquipment, field);
+              
+            case 'communicationSkillsAndEquipment':
+              return this.hasExactResourceMatch(household.communicationSkillsAndEquipment, field);
+              
+            default:
+              return false;
+          }
+        });
       });
     });
   }
@@ -356,16 +373,17 @@ class DataLayer {
       communicationSkillsAndEquipment: data.communicationSkillsAndEquipment?.trim() || '',
       communicationsRegionName: data.communicationsRegionName?.trim() || '',
       communicationsClusterId: parseInt(data.communicationsClusterId) || 0,
+      // Set original values for change tracking
+      originalCommunicationsRegionName: data.communicationsRegionName?.trim() || '',
+      originalCommunicationsClusterId: parseInt(data.communicationsClusterId) || 0,
       created: Date.now(),
       modified: Date.now()
     });
   }
   
   async processCSVData(csvRows) {
-    console.log('DataLayer: Processing CSV with', csvRows.length, 'rows');
     const households = [];
     const columnMappings = this.detectColumnMappings(csvRows[0] || {});
-    console.log('DataLayer: Column mappings:', columnMappings);
     
     // Initialize region/cluster stats
     this.state.clearRegionStats();
@@ -385,13 +403,11 @@ class DataLayer {
         // Build region/cluster stats incrementally
         this.updateRegionStatsIncremental(household);
         
-        if (i < 3) console.log(`DataLayer: Processed row ${i + 1}:`, household.name);
       } catch (error) {
         console.warn(`DataLayer: Skipping row ${i + 1}:`, error.message, row);
       }
     }
     
-    console.log('DataLayer: Processed', households.length, 'valid households');
     return households;
   }
   
@@ -551,6 +567,17 @@ class DataLayer {
            numLat !== 0 && numLon !== 0; // Exclude 0,0 coordinates
   }
   
+  hasExactResourceMatch(householdField, filterValue) {
+    if (!householdField || !filterValue) return false;
+    
+    // Split by comma and trim each item
+    const householdItems = householdField.split(',').map(item => item.trim().toLowerCase());
+    const filterValueLower = filterValue.toLowerCase();
+    
+    // Check for exact match in the list
+    return householdItems.some(item => item === filterValueLower);
+  }
+
   parseBoolean(value) {
     if (typeof value === 'boolean') return value;
     if (typeof value === 'string') {

@@ -33,7 +33,6 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
       if (manifest) {
         this.tileManifest = new Set(manifest.tiles);
         this.manifestLoaded = true;
-        console.log(`Loaded ${this.layerType} tile manifest: ${manifest.tiles.length} tiles`);
         return Promise.resolve(manifest);
       } else {
         console.warn(`${this.layerType} manifest not found`);
@@ -118,12 +117,6 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
     // Try online if available
     if (this.mapManager && this.mapManager.isOnline) {
       // Ensure coords are in the format Leaflet expects for getTileUrl
-      console.log('Original coords:', coords, 'x:', coords.x, 'y:', coords.y, 'z:', coords.z);
-      const normalizedCoords = {
-        x: coords.x,
-        y: coords.y,
-        z: coords.z
-      };
       // Manual URL generation since Leaflet's getTileUrl has issues
       const subdomains = ['a', 'b', 'c'];
       const subdomain = subdomains[Math.abs(coords.x + coords.y) % subdomains.length];
@@ -132,7 +125,6 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
         .replace('{z}', coords.z)
         .replace('{x}', coords.x)
         .replace('{y}', coords.y);
-      console.log('Manual URL:', onlineUrl);
       tile.src = onlineUrl;
       tile.hasTriedOnline = true;
       
@@ -337,16 +329,16 @@ class MapManager {
       zoomControl: false
     }).setView([35.9, -80.45], 10);
     
-    // Add zoom control to top-right to avoid sidebar toggle
-    L.control.zoom({
-      position: 'topright'
-    }).addTo(this.map);
-    
     // Create hybrid tile layers
     this.createTileLayers();
     
-    // Set up layer control
+    // Set up layer control first (so it appears above zoom control)
     this.setupLayerControl();
+    
+    // Add zoom control to top-right (below layer control)
+    L.control.zoom({
+      position: 'topright'
+    }).addTo(this.map);
     
     // Create overlay layers
     this.createOverlayLayers();
@@ -425,7 +417,8 @@ class MapManager {
     };
     
     L.control.layers(baseMaps, null, {
-      position: 'topright'
+      position: 'topright',
+      collapsed: false
     }).addTo(this.map);
   }
   
@@ -436,10 +429,14 @@ class MapManager {
   }
   
   setupMapEventListeners() {
-    // Clear highlights when clicking on map background
+    // Clear selection highlights when clicking on map background
+    // (but preserve resource filter highlights)
     this.map.on('click', (e) => {
       if (!e.originalEvent.target.closest('.leaflet-marker-icon')) {
-        if (window.clearHighlights) window.clearHighlights();
+        // Only clear selection highlights, not resource filter highlights
+        if (window.highlightingManager) {
+          window.highlightingManager.clearHighlights();
+        }
       }
     });
   }
@@ -575,8 +572,7 @@ class MapManager {
     // Add resource information sections
     popupHtml = this.addResourceSections(household, popupHtml);
     
-    if (household.originalCommunicationsRegionName !== household.communicationsRegionName || 
-        household.originalCommunicationsClusterId !== household.communicationsClusterId) {
+    if (household.isModified()) {
       popupHtml += `<div style="color: red; font-weight: bold; margin-top: 5px;">*Modified*</div>`;
     }
     
