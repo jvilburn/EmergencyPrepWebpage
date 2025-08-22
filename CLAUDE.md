@@ -115,9 +115,6 @@ Current CSV format with 11 columns (order matters):
 
 ## Important Patterns
 
-### Dynamic Column Detection
-The application automatically detects CSV columns by header name patterns, making it flexible for different data formats.
-
 ### Resource Value Checking
 Resource fields accept multiple true representations: 'true', '1', 'yes', 'y'
 
@@ -154,6 +151,7 @@ const osmManifest = {
 - **Offline-first** - Works with file:// protocol without server
 
 ## Recent Updates & Bug Fixes
+Created an Electron app from the site
 
 ### UI Improvements
 - Switched sort button order: "By Name" first (default), "By Communication Region" second
