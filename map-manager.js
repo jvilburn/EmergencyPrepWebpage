@@ -6,7 +6,7 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
     this.offlineUrlTemplate = offlineUrlTemplate;
     this.onlineUrlTemplate = onlineUrlTemplate;
     this.onlineMode = false;
-    this.layerType = options.layerType || 'osm';
+    this.layer_type = options.layer_type || 'osm';
     this.mapManager = options.mapManager; // Reference to MapManager instance
     
     // Tile manifest system
@@ -24,9 +24,9 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
     // Manifests are loaded as JavaScript variables from tiles/*-manifest.js files
     try {
       let manifest;
-      if (this.layerType === 'osm' && typeof osmManifest !== 'undefined') {
+      if (this.layer_type === 'osm' && typeof osmManifest !== 'undefined') {
         manifest = osmManifest;
-      } else if (this.layerType === 'satellite' && typeof satelliteManifest !== 'undefined') {
+      } else if (this.layer_type === 'satellite' && typeof satelliteManifest !== 'undefined') {
         manifest = satelliteManifest;
       }
       
@@ -35,13 +35,13 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
         this.manifestLoaded = true;
         return Promise.resolve(manifest);
       } else {
-        console.warn(`${this.layerType} manifest not found`);
+        console.warn(`${this.layer_type} manifest not found`);
         this.manifestLoaded = true;
         this.tileManifest = new Set();
         return Promise.resolve(null);
       }
     } catch (error) {
-      console.warn(`Error loading ${this.layerType} manifest:`, error);
+      console.warn(`Error loading ${this.layer_type} manifest:`, error);
       this.manifestLoaded = true;
       this.tileManifest = new Set();
       return Promise.resolve(null);
@@ -56,7 +56,7 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
     // Format tile key based on layer type
     // OSM uses z/x/y format, satellite (ArcGIS) uses z/y/x format
     let tileKey;
-    if (this.layerType === 'satellite') {
+    if (this.layer_type === 'satellite') {
       tileKey = `${coords.z}/${coords.y}/${coords.x}.png`;
     } else {
       tileKey = `${coords.z}/${coords.x}/${coords.y}.png`;
@@ -110,7 +110,7 @@ L.TileLayer.Hybrid = L.TileLayer.extend({
     
     // Track missing offline tile
     if (this.mapManager && window.tileManager) {
-      window.tileManager.trackMissingTile(this.layerType, tileKey);
+      window.tileManager.trackMissingTile(this.layer_type, tileKey);
       this.mapManager.updateConnectivityIndicator();
     }
     
@@ -365,7 +365,7 @@ class MapManager {
         maxZoom: 16,
         minZoom: 7,
         subdomains: ['a', 'b', 'c'],
-        layerType: 'osm',
+        layer_type: 'osm',
         mapManager: this,
         errorTileUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjEyOCIgeT0iMTI4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LXNpemU9IjE0Ij5ObyBUaWxlPC90ZXh0Pjwvc3ZnPg=='
       }
@@ -381,7 +381,7 @@ class MapManager {
         onlineAttribution: '© Esri | Online Mode',
         maxZoom: 16,
         minZoom: 7,
-        layerType: 'satellite',
+        layer_type: 'satellite',
         mapManager: this,
         errorTileUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iIzk1YTVhNiIvPjx0ZXh0IHg9IjEyOCIgeT0iMTI4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjY2IiBmb250LXNpemU9IjE0Ij5ObyBUaWxlPC90ZXh0Pjwvc3ZnPg=='
       }

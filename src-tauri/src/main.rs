@@ -11,6 +11,7 @@ struct TileRequest {
     z: u8,
     x: u32,
     y: u32,
+    #[serde(rename = "layerType")]
     layer_type: String,
 }
 
@@ -118,8 +119,8 @@ async fn download_and_save_tile(url: &str, path: &Path) -> Result<(), String> {
     Ok(())
 }
 
-async fn update_manifest(tiles_dir: &Path, layer_type: &str) -> Result<(), String> {
-    let layer_dir = tiles_dir.join(layer_type);
+async fn update_manifest(tiles_dir: &Path, #[allow(non_snake_case)] layerType: &str) -> Result<(), String> {
+    let layer_dir = tiles_dir.join(layerType);
     if !layer_dir.exists() {
         return Ok(());
     }
@@ -141,17 +142,17 @@ async fn update_manifest(tiles_dir: &Path, layer_type: &str) -> Result<(), Strin
     let mut zoom_levels_vec: Vec<_> = zoom_levels.into_iter().collect();
     zoom_levels_vec.sort();
     
-    let name = if layer_type == "osm" { 
+    let name = if layerType == "osm" { 
         "OpenStreetMap Tiles" 
     } else { 
         "Satellite Imagery Tiles" 
     };
     
-    let format = if layer_type == "osm" { "z/x/y" } else { "z/y/x" };
+    let format = if layerType == "osm" { "z/x/y" } else { "z/y/x" };
     
     let manifest = serde_json::json!({
         "name": name,
-        "type": layer_type,
+        "type": layerType,
         "format": format,
         "tile_count": sorted_tiles.len(),
         "tiles": sorted_tiles,
@@ -159,7 +160,7 @@ async fn update_manifest(tiles_dir: &Path, layer_type: &str) -> Result<(), Strin
         "generated": chrono::Utc::now().to_rfc3339()
     });
     
-    let manifest_path = tiles_dir.join(format!("{}-manifest.json", layer_type));
+    let manifest_path = tiles_dir.join(format!("{}-manifest.json", layerType));
     let manifest_content = serde_json::to_string_pretty(&manifest)
         .map_err(|e| e.to_string())?;
     
@@ -260,7 +261,7 @@ fn main() {
 
 #[command]
 async fn get_manifest(
-    layerType: String,
+    #[allow(non_snake_case)] layerType: String,
     app_handle: tauri::AppHandle,
 ) -> Result<serde_json::Value, String> {
     let app_dir = app_handle.path().app_data_dir()
@@ -307,7 +308,7 @@ async fn get_manifest(
 
 #[command]
 async fn get_tile_path(
-    layerType: String,
+    #[allow(non_snake_case)] layerType: String,
     z: u32,
     x: u32,
     y: u32,
