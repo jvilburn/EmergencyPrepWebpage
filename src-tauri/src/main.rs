@@ -248,8 +248,7 @@ fn main() {
             download_tile,
             check_tile_exists,
             get_tile_path,
-            get_manifest,
-            get_app_data_dir
+            get_manifest
         ])
         .setup(|_app| {
             println!("Tauri app starting with tile downloading...");
@@ -327,10 +326,3 @@ async fn get_tile_path(
     Ok(tile_path.to_string_lossy().to_string())
 }
 
-#[command]
-async fn get_app_data_dir(app_handle: tauri::AppHandle) -> Result<String, String> {
-    let app_dir = app_handle.path().app_data_dir()
-        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
-    
-    Ok(app_dir.to_string_lossy().to_string())
-}
