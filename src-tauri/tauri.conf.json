@@ -6,7 +6,6 @@
   "build": {
     "beforeDevCommand": "",
     "beforeBuildCommand": "",
-    "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },
     "app": {
@@ -22,12 +21,19 @@
         }
       ],
       "security": {
-        "csp": null
-      }
+        "csp": "default-src 'self'; style-src 'self' 'unsafe-inline' https://unpkg.com; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com; img-src 'self' data: https: asset: https://asset.localhost; connect-src 'self' https: ipc: tauri: asset: https://asset.localhost; font-src 'self' https://unpkg.com",
+        "assetProtocol": {
+          "enable": true,
+          "scope": ["**"]
+        }
+      },
+      "withGlobalTauri": true
     },
     "bundle": {
       "active": true,
       "targets": "all",
-      "icon": []
+      "icon": [
+        "icons/icon.ico"
+      ]
     }
   }

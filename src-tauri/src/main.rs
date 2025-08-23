@@ -1,8 +1,336 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use serde::{Deserialize, Serialize};
+use std::path::Path;
+use tauri::{command, Manager};
+use tokio::fs;
+
+#[derive(Debug, Serialize, Deserialize)]
+struct TileRequest {
+    z: u8,
+    x: u32,
+    y: u32,
+    layer_type: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct TileResponse {
+    success: bool,
+    cached: bool,
+    path: Option<String>,
+    error: Option<String>,
+}
+
+#[command]
+async fn download_tile(
+    tile_request: TileRequest,
+    app_handle: tauri::AppHandle,
+) -> Result<TileResponse, String> {
+    let app_dir = app_handle.path().app_data_dir()
+        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+    
+    let tiles_dir = app_dir.join("tiles");
+    let layer_dir = tiles_dir.join(&tile_request.layer_type);
+    
+    // Create directory structure
+    let tile_dir = if tile_request.layer_type == "satellite" {
+        // ArcGIS uses z/y/x format
+        layer_dir.join(tile_request.z.to_string()).join(tile_request.y.to_string())
+    } else {
+        // OSM uses z/x/y format
+        layer_dir.join(tile_request.z.to_string()).join(tile_request.x.to_string())
+    };
+    
+    let tile_path = if tile_request.layer_type == "satellite" {
+        tile_dir.join(format!("{}.png", tile_request.x))
+    } else {
+        tile_dir.join(format!("{}.png", tile_request.y))
+    };
+    
+    // Check if tile already exists
+    if tile_path.exists() {
+        return Ok(TileResponse {
+            success: true,
+            cached: true,
+            path: Some(tile_path.to_string_lossy().to_string()),
+            error: None,
+        });
+    }
+    
+    // Create directory structure
+    fs::create_dir_all(&tile_dir).await
+        .map_err(|e| format!("Failed to create tile directory: {}", e))?;
+    
+    // Download tile
+    let url = if tile_request.layer_type == "satellite" {
+        format!(
+            "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{}/{}/{}",
+            tile_request.z, tile_request.y, tile_request.x
+        )
+    } else {
+        format!(
+            "https://tile.openstreetmap.org/{}/{}/{}.png",
+            tile_request.z, tile_request.x, tile_request.y
+        )
+    };
+    
+    match download_and_save_tile(&url, &tile_path).await {
+        Ok(_) => {
+            // Update manifest after successful download
+            update_manifest(&tiles_dir, &tile_request.layer_type).await?;
+            
+            Ok(TileResponse {
+                success: true,
+                cached: false,
+                path: Some(tile_path.to_string_lossy().to_string()),
+                error: None,
+            })
+        }
+        Err(e) => Ok(TileResponse {
+            success: false,
+            cached: false,
+            path: None,
+            error: Some(e),
+        }),
+    }
+}
+
+async fn download_and_save_tile(url: &str, path: &Path) -> Result<(), String> {
+    let client = reqwest::Client::new();
+    let response = client
+        .get(url)
+        .header("User-Agent", "Ward Directory Map/1.0.0")
+        .send()
+        .await
+        .map_err(|e| format!("Failed to download tile: {}", e))?;
+    
+    if !response.status().is_success() {
+        return Err(format!("HTTP error: {}", response.status()));
+    }
+    
+    let bytes = response.bytes().await
+        .map_err(|e| format!("Failed to read response: {}", e))?;
+    
+    fs::write(path, &bytes).await
+        .map_err(|e| format!("Failed to write tile: {}", e))?;
+    
+    Ok(())
+}
+
+async fn update_manifest(tiles_dir: &Path, layer_type: &str) -> Result<(), String> {
+    let layer_dir = tiles_dir.join(layer_type);
+    if !layer_dir.exists() {
+        return Ok(());
+    }
+    
+    // Recursively find all PNG files
+    let tile_results = find_tiles_recursive(layer_dir.to_path_buf(), String::new()).await?;
+    
+    let mut tiles = Vec::new();
+    let mut zoom_levels = std::collections::HashSet::new();
+    
+    for (tile_path, zoom) in tile_results {
+        tiles.push(tile_path);
+        zoom_levels.insert(zoom);
+    }
+    
+    let mut sorted_tiles = tiles;
+    sorted_tiles.sort();
+    
+    let mut zoom_levels_vec: Vec<_> = zoom_levels.into_iter().collect();
+    zoom_levels_vec.sort();
+    
+    let name = if layer_type == "osm" { 
+        "OpenStreetMap Tiles" 
+    } else { 
+        "Satellite Imagery Tiles" 
+    };
+    
+    let format = if layer_type == "osm" { "z/x/y" } else { "z/y/x" };
+    
+    let manifest = serde_json::json!({
+        "name": name,
+        "type": layer_type,
+        "format": format,
+        "tile_count": sorted_tiles.len(),
+        "tiles": sorted_tiles,
+        "zoom_levels": zoom_levels_vec,
+        "generated": chrono::Utc::now().to_rfc3339()
+    });
+    
+    let manifest_path = tiles_dir.join(format!("{}-manifest.json", layer_type));
+    let manifest_content = serde_json::to_string_pretty(&manifest)
+        .map_err(|e| e.to_string())?;
+    
+    fs::write(&manifest_path, manifest_content).await
+        .map_err(|e| format!("Failed to write manifest: {}", e))?;
+    
+    Ok(())
+}
+
+fn find_tiles_recursive(
+    dir: std::path::PathBuf,
+    relative_path: String,
+) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Vec<(String, u8)>, String>> + Send + Sync>> {
+    Box::pin(async move {
+        let mut result = Vec::new();
+        let mut entries = fs::read_dir(&dir).await
+            .map_err(|e| format!("Failed to read directory: {}", e))?;
+        
+        while let Some(entry) = entries.next_entry().await
+            .map_err(|e| format!("Failed to read directory entry: {}", e))? {
+            
+            let path = entry.path();
+            let name = entry.file_name().to_string_lossy().to_string();
+            
+            if path.is_dir() {
+                let new_relative = if relative_path.is_empty() {
+                    name
+                } else {
+                    format!("{}/{}", relative_path, name)
+                };
+                let mut sub_tiles = find_tiles_recursive(path, new_relative).await?;
+                result.append(&mut sub_tiles);
+            } else if name.ends_with(".png") {
+                let tile_path = if relative_path.is_empty() {
+                    name
+                } else {
+                    format!("{}/{}", relative_path, name)
+                };
+                
+                // Extract zoom level for tracking
+                let zoom = if let Some(zoom_str) = tile_path.split('/').next() {
+                    zoom_str.parse::<u8>().unwrap_or(0)
+                } else {
+                    0
+                };
+                
+                result.push((tile_path, zoom));
+            }
+        }
+        
+        Ok(result)
+    })
+}
+
+#[command]
+async fn check_tile_exists(
+    tile_request: TileRequest,
+    app_handle: tauri::AppHandle,
+) -> Result<bool, String> {
+    let app_dir = app_handle.path().app_data_dir()
+        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+    
+    let tiles_dir = app_dir.join("tiles");
+    let layer_dir = tiles_dir.join(&tile_request.layer_type);
+    
+    let tile_path = if tile_request.layer_type == "satellite" {
+        layer_dir
+            .join(tile_request.z.to_string())
+            .join(tile_request.y.to_string())
+            .join(format!("{}.png", tile_request.x))
+    } else {
+        layer_dir
+            .join(tile_request.z.to_string())
+            .join(tile_request.x.to_string())
+            .join(format!("{}.png", tile_request.y))
+    };
+    
+    Ok(tile_path.exists())
+}
+
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_fs::init())
+        .invoke_handler(tauri::generate_handler![
+            download_tile,
+            check_tile_exists,
+            get_tile_path,
+            get_manifest,
+            get_app_data_dir
+        ])
+        .setup(|_app| {
+            println!("Tauri app starting with tile downloading...");
+            Ok(())
+        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+#[command]
+async fn get_manifest(
+    layerType: String,
+    app_handle: tauri::AppHandle,
+) -> Result<serde_json::Value, String> {
+    let app_dir = app_handle.path().app_data_dir()
+        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+    
+    let tiles_dir = app_dir.join("tiles");
+    let manifest_path = tiles_dir.join(format!("{}-manifest.json", layerType));
+    
+    // If manifest doesn't exist, create an empty one
+    if !manifest_path.exists() {
+        // Ensure directory exists
+        fs::create_dir_all(&tiles_dir).await
+            .map_err(|e| format!("Failed to create tiles directory: {}", e))?;
+        
+        // Create empty manifest
+        let empty_manifest = serde_json::json!({
+            "name": if layerType == "osm" { "OpenStreetMap Tiles" } else { "Satellite Tiles" },
+            "type": layerType,
+            "format": if layerType == "osm" { "z/x/y" } else { "z/y/x" },
+            "tile_count": 0,
+            "tiles": [],
+            "zoom_levels": [],
+            "generated": chrono::Utc::now().to_rfc3339()
+        });
+        
+        let content = serde_json::to_string_pretty(&empty_manifest)
+            .map_err(|e| format!("Failed to serialize manifest: {}", e))?;
+        
+        fs::write(&manifest_path, content).await
+            .map_err(|e| format!("Failed to write manifest: {}", e))?;
+        
+        return Ok(empty_manifest);
+    }
+    
+    // Read existing manifest
+    let content = fs::read_to_string(&manifest_path).await
+        .map_err(|e| format!("Failed to read manifest: {}", e))?;
+    
+    let manifest: serde_json::Value = serde_json::from_str(&content)
+        .map_err(|e| format!("Failed to parse manifest: {}", e))?;
+    
+    Ok(manifest)
+}
+
+#[command]
+async fn get_tile_path(
+    layerType: String,
+    z: u32,
+    x: u32,
+    y: u32,
+    app_handle: tauri::AppHandle,
+) -> Result<String, String> {
+    let app_dir = app_handle.path().app_data_dir()
+        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+    
+    let tile_path = if layerType == "satellite" {
+        app_dir.join("tiles").join(&layerType).join(z.to_string()).join(y.to_string()).join(format!("{}.png", x))
+    } else {
+        app_dir.join("tiles").join(&layerType).join(z.to_string()).join(x.to_string()).join(format!("{}.png", y))
+    };
+    
+    // Return the actual file path - convertFileSrc will be called on the frontend
+    Ok(tile_path.to_string_lossy().to_string())
+}
+
+#[command]
+async fn get_app_data_dir(app_handle: tauri::AppHandle) -> Result<String, String> {
+    let app_dir = app_handle.path().app_data_dir()
+        .map_err(|e| format!("Failed to get app data dir: {}", e))?;
+    
+    Ok(app_dir.to_string_lossy().to_string())
 }
