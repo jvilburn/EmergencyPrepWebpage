@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Ward Directory Map",
+  "version": "1.0.0",
+  "identifier": "com.ward.directory.map",
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "",
+    "devUrl": "http://localhost:1420",
+    "frontendDist": "../dist"
+  },
+    "app": {
+      "windows": [
+        {
+          "fullscreen": false,
+          "resizable": true,
+          "title": "Ward Directory Map",
+          "width": 1400,
+          "height": 900,
+          "minWidth": 800,
+          "minHeight": 600
+        }
+      ],
+      "security": {
+        "csp": null
+      }
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "icon": []
+    }
+  }

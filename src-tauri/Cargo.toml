@@ -1,0 +1,18 @@
+[package]
+name = "ward-directory-map"
+version = "1.0.0"
+description = "Ward Directory Map - Offline mapping for church/LDS ward management"
+authors = ["Ward Directory Map Team"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+tauri = { version = "2.0", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
