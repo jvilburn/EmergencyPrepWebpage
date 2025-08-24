@@ -3,7 +3,8 @@
 
 use serde::{Deserialize, Serialize};
 use std::path::Path;
-use tauri::{command, Manager};
+use tauri::{command, Manager, Emitter};
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tokio::fs;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -241,8 +242,114 @@ async fn check_tile_exists(
     Ok(tile_path.exists())
 }
 
+fn build_menu<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> Result<Menu<R>, Box<dyn std::error::Error>> {
+    // Create menu items with the app handle
+    let load_csv = MenuItem::with_id(app, "load_csv", "Load CSV", true, Some("CmdOrCtrl+O"))?;
+    let save_csv = MenuItem::with_id(app, "save_csv", "Save CSV", true, Some("CmdOrCtrl+S"))?;
+    let legend = MenuItem::with_id(app, "legend", "Legend", true, None::<&str>)?;
+    let reset_view = MenuItem::with_id(app, "reset_view", "Reset View", true, Some("CmdOrCtrl+R"))?;
+    let toggle_clusters = MenuItem::with_id(app, "toggle_clusters", "Toggle Clusters", true, None::<&str>)?;
+    let manage_regions = MenuItem::with_id(app, "manage_regions", "Manage Regions", true, None::<&str>)?;
+    let undo_last = MenuItem::with_id(app, "undo_last", "Undo Last", true, Some("CmdOrCtrl+Z"))?;
+    let clear_highlights = MenuItem::with_id(app, "clear_highlights", "Clear Highlights", true, None::<&str>)?;
+    
+    // Create the File menu
+    let file_separator = PredefinedMenuItem::separator(app)?;
+    let file_quit = PredefinedMenuItem::quit(app, None)?;
+    let file_menu = Submenu::with_items(app, "File", true, &[
+        &load_csv,
+        &save_csv,
+        &file_separator,
+        &file_quit,
+    ])?;
+    
+    // Create the Edit menu  
+    let edit_separator = PredefinedMenuItem::separator(app)?;
+    let edit_menu = Submenu::with_items(app, "Edit", true, &[
+        &manage_regions,
+        &edit_separator,
+        &undo_last,
+        &clear_highlights,
+    ])?;
+    
+    // Create the View menu
+    let view_menu = Submenu::with_items(app, "View", true, &[
+        &legend,
+        &reset_view,
+        &toggle_clusters,
+    ])?;
+    
+    // Build the menu bar
+    let menu = Menu::with_items(app, &[
+        &file_menu,
+        &edit_menu,
+        &view_menu,
+    ])?;
+    
+    Ok(menu)
+}
+
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            println!("Setting up Tauri app with native menus...");
+            
+            let menu = build_menu(&app.handle())?;
+            println!("Menu created successfully");
+            
+            // Try multiple approaches to set the menu
+            println!("Attempting to set menu on app...");
+            if let Err(e) = app.set_menu(menu.clone()) {
+                println!("Failed to set menu on app: {}", e);
+            } else {
+                println!("Menu set on app successfully");
+            }
+            
+            // Also try to set on the window after a delay
+            let app_handle = app.handle().clone();
+            let menu_clone = menu.clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(std::time::Duration::from_millis(100));
+                if let Some(window) = app_handle.get_webview_window("main") {
+                    if let Err(e) = window.set_menu(menu_clone) {
+                        println!("Failed to set menu on window: {}", e);
+                    } else {
+                        println!("Menu set on window successfully");
+                    }
+                }
+            });
+            
+            Ok(())
+        })
+        .on_menu_event(|app, event| {
+            match event.id().as_ref() {
+                "load_csv" => {
+                    app.get_webview_window("main").unwrap().emit("menu-action", "load_csv").unwrap();
+                }
+                "save_csv" => {
+                    app.get_webview_window("main").unwrap().emit("menu-action", "save_csv").unwrap();
+                }
+                "legend" => {
+                    app.get_webview_window("main").unwrap().emit("menu-action", "legend").unwrap();
+                }
+                "reset_view" => {
+                    app.get_webview_window("main").unwrap().emit("menu-action", "reset_view").unwrap();
+                }
+                "toggle_clusters" => {
+                    app.get_webview_window("main").unwrap().emit("menu-action", "toggle_clusters").unwrap();
+                }
+                "manage_regions" => {
+                    app.get_webview_window("main").unwrap().emit("menu-action", "manage_regions").unwrap();
+                }
+                "undo_last" => {
+                    app.get_webview_window("main").unwrap().emit("menu-action", "undo_last").unwrap();
+                }
+                "clear_highlights" => {
+                    app.get_webview_window("main").unwrap().emit("menu-action", "clear_highlights").unwrap();
+                }
+                _ => {}
+            }
+        })
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_fs::init())
         .invoke_handler(tauri::generate_handler![
@@ -252,7 +359,7 @@ fn main() {
             get_manifest
         ])
         .setup(|_app| {
-            println!("Tauri app starting with tile downloading...");
+            println!("Tauri app starting with native menus...");
             Ok(())
         })
         .run(tauri::generate_context!())
